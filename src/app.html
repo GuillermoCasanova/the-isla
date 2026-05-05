@@ -1,0 +1,42 @@
+<!doctype html>
+<!--
+  /* WEBSITE CREDITS */
+  Website designed & Developed by PANCARTA
+  WWWW.GUILLERMO-CASANOVA.COM
+-->
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="icon" href="%sveltekit.assets%/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    %sveltekit.head%
+
+    <style>
+      body {
+        filter: blur(35px);
+        animation: entry-animation 0.5s ease-in forwards 0.7s;
+      }
+
+      @media screen and (min-width: 780px) {
+        body {
+          animation: entry-animation 0.5s ease-in forwards 0.2s;
+        }
+      }
+
+      @keyframes entry-animation {
+        0% {
+          filter: blur(30px);
+        }
+
+        100% {
+          filter: blur(0);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div>%sveltekit.body%</div>
+  </body>
+</html>
