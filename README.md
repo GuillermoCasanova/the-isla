@@ -1,5 +1,16 @@
 # The Isla — Fashion show site
 
+```text
+       \ \ | / /
+        \ \|/ /
+         `--+--´
+            |
+           /|\
+          / | \
+         /  |  \
+           / \
+```
+
 Marketing / event site for **The Isla**, built with **[SvelteKit](https://kit.svelte.dev/)** (Vite 4, Svelte 3). Page content and listings are loaded from **[Notion](https://www.notion.so/)** via the official Notion API.
 
 ## Stack
