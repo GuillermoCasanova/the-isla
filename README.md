@@ -1,38 +1,71 @@
-# create-svelte
+# The Isla — Fashion show site
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+Marketing / event site for **The Isla**, built with **[SvelteKit](https://kit.svelte.dev/)** (Vite 4, Svelte 3). Page content and listings are loaded from **[Notion](https://www.notion.so/)** via the official Notion API.
 
-## Creating a project
+## Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+| Piece | Role |
+|--------|------|
+| **SvelteKit** (`@sveltejs/kit` 1.x) | App framework, routing, server load functions |
+| **Notion** (`@notionhq/client`) | CMS — databases queried for music links, features, shows, people, etc. |
+| **`adapter-node`** | Node production build (`npm run build` → `build/`) |
+| **Express** | Optional custom server (`src/server.js`) that mounts SvelteKit middlewares (e.g. behind nginx on a Unix socket) |
+| **GSAP**, **Swiper**, **normalize.css** | Animation, carousels, base styles |
 
-```bash
-# create a new project in the current directory
-npm init svelte
+## Prerequisites
 
-# create a new project in my-app
-npm init svelte my-app
-```
+- **Node.js** (LTS recommended)
+- A **Notion integration** with access to the databases this app reads from
 
-## Developing
+## Setup
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+1. **Install dependencies**
 
-```bash
-npm run dev
+   ```bash
+   npm install
+   ```
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+2. **Environment variables**
 
-## Building
+   Create a `.env` in the project root (this file is gitignored):
 
-To create a production version of your app:
+   ```env
+   NOTION_KEY=secret_...
+   NOTION_DB=...
+   ```
 
-```bash
-npm run build
-```
+   - **`NOTION_KEY`** — Notion integration secret (`ntn_` / integration token from Notion).
+   - **`NOTION_DB`** — Used by API routes that query your main configurable database (e.g. music links). Some routes use database IDs defined in code; you still need a valid **`NOTION_KEY`** for every Notion request.
 
-You can preview the production build with `npm run preview`.
+   Restart the dev server after changing `.env`.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## Scripts
+
+| Command | What it does |
+|---------|----------------|
+| `npm run dev` | Dev server (Vite) |
+| `npm run build` | Production build for Node adapter → `build/` |
+| `npm run preview` | Serve the production build locally |
+| `npm start` | Run `node build/index.js` (default adapter Node server) |
+| `npm run check` | `svelte-check` |
+| `npm test` | Playwright (`playwright.config.js` builds then previews on port **4173**; add tests under the usual Playwright layout when needed) |
+| `npm run lint` | Prettier + ESLint |
+| `npm run format` | Prettier write |
+
+## How the app is structured
+
+- **`src/routes/+page.svelte`** — Main page UI.
+- **`src/routes/+page.server.js`** — Server `load` function: calls internal **`/api/*`** routes to assemble music links, features, and **streamed** payloads (shows, other people, other content) for progressive loading.
+- **`src/routes/api/**`** — SvelteKit endpoints; each uses the shared Notion client from **`src/lib/notion.js`** (`dotenv` + `NOTION_KEY` / `NOTION_DB` where applicable).
+- **`src/server.js`** — Express app that wires **`assetsMiddleware`**, **`prerenderedMiddleware`**, and **`kitMiddleware`** from the built app. The checked-in version listens on **`/tmp/nginx.socket`** — adjust for your host (or use `npm start` / platform defaults if you do not use this wrapper).
+
+## Production notes
+
+1. Build: `npm run build`
+2. Either run **`npm start`** (adapter Node entry) **or** run your custom **`src/server.js`** after building, depending on how you deploy (ensure the socket/path or port matches your process manager / reverse proxy).
+
+HTTPS dev via `@vitejs/plugin-basic-ssl` is commented out in `vite.config.js`; enable there if you need local HTTPS.
+
+## License / content
+
+Site content lives in Notion and in the repo’s static assets; treat Notion credentials and `.env` as secrets and never commit them.
