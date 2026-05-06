@@ -142,6 +142,10 @@ onMount(() => {
               height="751"
             />
           </div>
+
+          <div class="vip__form">
+            <div class="klaviyo-form-RA2K3z"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -299,5 +303,11 @@ onMount(() => {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.vip__form {
+  width: min(92vw, 640px);
+  margin-top: clamp(1.25rem, 4vh, 2.5rem);
+  z-index: 3;
 }
 </style>
