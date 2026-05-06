@@ -20,6 +20,14 @@
     font-display: swap;
 } 
 
+@font-face {
+    font-family: 'isla_00260';
+    src: url('$lib/assets/00260.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 
 
 /*------------------------------------*\
@@ -211,6 +219,7 @@ img {
     --primary-font-family: 'humanist_521_light', 'sans-serif';
     --secondary-font-family: 'humanist_521_regular', 'sans-serif';
     --tertiary-font-family: 'humanist_521_regular', 'arial', 'sans-serif';
+    --font-isla-00260: 'isla_00260', ui-sans-serif, system-ui, sans-serif;
     --letter-spacing-1: 1px;
     --letter-spacing-2: 1px;
     --letter-spacing-3: 3px;
