@@ -1,0 +1,22 @@
+{
+	"/": [
+		"src/routes/+page.server.js",
+		"src/routes/+layout.js",
+		"src/routes/+layout.js"
+	],
+	"/api/get-features": [
+		"src/routes/api/get-features/+server.js"
+	],
+	"/api/get-music-links": [
+		"src/routes/api/get-music-links/+server.js"
+	],
+	"/api/get-other-people": [
+		"src/routes/api/get-other-people/+server.js"
+	],
+	"/api/get-other": [
+		"src/routes/api/get-other/+server.js"
+	],
+	"/api/get-shows": [
+		"src/routes/api/get-shows/+server.js"
+	]
+}
