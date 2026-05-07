@@ -1,21 +1,9 @@
 <script>
-import { onMount, tick } from "svelte";
-import { afterNavigate } from "$app/navigation";
 import cardImg from "$lib/assets/Card.png";
 import envelopeImg from "$lib/assets/envelope.png";
 
 const backgroundVideoSrc =
   "https://public-assets.content-platform.envatousercontent.com/4c480208-1b25-4c61-b568-61746f5b908f/7e7c95f4-ba97-4589-aed4-e37f9f47392d/4c480208-1b25-4c61-b568-61746f5b908f/preview_540p_crf22_higher_quality.mp4";
-
-/** Scroll-scrubbed reveal: card rises from behind the envelope */
-const VIP_CARD_SCROLL = {
-  /** Viewport heights of scroll while pinned (higher = slower reveal) */
-  scrollDistanceVh: 1.25,
-  /** Scroll coupling: number = slight lag (seconds); true = 1:1 */
-  scrub: 0.55,
-  /** Card starts this many px lower (behind envelope), ends at 0 */
-  cardStartY: 165,
-};
 
 let rootEl;
 
@@ -23,84 +11,6 @@ function vipRoot() {
   return rootEl ?? document.getElementById("vip-page");
 }
 
-afterNavigate(() => {
-  import("gsap/ScrollTrigger").then(({ ScrollTrigger }) =>
-    ScrollTrigger.refresh(),
-  );
-});
-
-onMount(() => {
-  let ctx;
-  let cancelled = false;
-  let loadHandler;
-
-  (async () => {
-    const [{ gsap }, { ScrollTrigger }] = await Promise.all([
-      import("gsap"),
-      import("gsap/ScrollTrigger"),
-    ]);
-    gsap.registerPlugin(ScrollTrigger);
-
-    await tick();
-    if (cancelled) return;
-
-    const root = vipRoot();
-    if (!root) return;
-
-    const reveal = root.querySelector(".vip-reveal");
-    const card = root.querySelector(".vip-card");
-    if (!reveal || !card) return;
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      gsap.set(card, { y: 0 });
-      return;
-    }
-
-    const refresh = () => ScrollTrigger.refresh();
-
-    ctx = gsap.context(() => {
-      gsap.fromTo(
-        card,
-        { y: VIP_CARD_SCROLL.cardStartY },
-        {
-          y: 0,
-          ease: "none",
-          scrollTrigger: {
-            trigger: reveal,
-            start: "top top",
-            end: () =>
-              `+=${window.innerHeight * VIP_CARD_SCROLL.scrollDistanceVh}`,
-            pin: true,
-            pinSpacing: true,
-            pinType: "transform",
-            scrub: VIP_CARD_SCROLL.scrub,
-            invalidateOnRefresh: true,
-          },
-        },
-      );
-    }, root);
-
-    if (cancelled) {
-      ctx.revert();
-      ctx = undefined;
-      return;
-    }
-
-    const img = card.querySelector("img");
-    if (img?.complete) requestAnimationFrame(refresh);
-    else img?.addEventListener("load", refresh, { once: true });
-
-    loadHandler = refresh;
-    window.addEventListener("load", loadHandler);
-    requestAnimationFrame(refresh);
-  })();
-
-  return () => {
-    cancelled = true;
-    if (loadHandler) window.removeEventListener("load", loadHandler);
-    ctx?.revert();
-  };
-});
 </script>
 
 <svelte:head>
@@ -117,9 +27,17 @@ onMount(() => {
           <span class="vip__header-right">06.28.26</span>
         </header>
 
-        <div class="vip__stage">
+        <div
+          class="vip__stage"
+          style="
+            --vip-card-start-y: 165px;
+            --vip-reveal-duration: 1600ms;
+          "
+        >
           <div class="vip__card-column">
-            <article class="vip-card">
+            <article
+              class="vip-card"
+            >
               <h1 class="visually-hidden">
                 Invitación VIP — La Isla Fashion Show
               </h1>
@@ -133,7 +51,10 @@ onMount(() => {
             </article>
           </div>
 
-          <div class="vip__envelope vip_envelope" aria-hidden="true">
+          <div
+            class="vip__envelope vip_envelope"
+            aria-hidden="true"
+          >
             <img
               class="vip__envelope-img"
               src={envelopeImg}
@@ -143,8 +64,8 @@ onMount(() => {
             />
           </div>
 
-          <div class="vip__form">
-            <div class="klaviyo-form-RA2K3z"></div>
+          <div class="vip__form" style="height: 10rem">
+            <div class="klaviyo-form-RXCRDS"></div>
           </div>
         </div>
       </section>
@@ -152,15 +73,6 @@ onMount(() => {
   </div>
 </div>
 
-<video
-  class="home__video"
-  src={backgroundVideoSrc}
-  autoplay
-  muted
-  loop
-  playsinline
-  aria-hidden="true"
-/>
 
 <style>
 .vip {
@@ -278,6 +190,8 @@ onMount(() => {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
   line-height: 0;
   will-change: transform;
+  transform: translate3d(0, var(--vip-card-start-y, 165px), 0);
+  animation: vip-card-rise var(--vip-reveal-duration, 1600ms) cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .vip-card__img {
@@ -297,6 +211,9 @@ onMount(() => {
   pointer-events: none;
   filter: drop-shadow(0 -4px 24px rgba(0, 0, 0, 0.25));
   line-height: 0;
+  will-change: opacity;
+  opacity: 1;
+  animation: vip-envelope-fade var(--vip-reveal-duration, 1600ms) ease-out forwards;
 }
 
 .vip__envelope-img {
@@ -309,5 +226,43 @@ onMount(() => {
   width: min(92vw, 640px);
   margin-top: clamp(1.25rem, 4vh, 2.5rem);
   z-index: 3;
+}
+
+@keyframes vip-card-rise {
+  from {
+    transform: translate3d(0, var(--vip-card-start-y, 165px), 0);
+  }
+  to {
+    transform: translate3d(0, 0px, 0);
+  }
+}
+
+@keyframes vip-envelope-fade {
+  0% {
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vip-card,
+  .vip__envelope,
+  .vip_envelope {
+    animation: none !important;
+  }
+
+  .vip-card {
+    transform: translate3d(0, 0px, 0) !important;
+  }
+
+  .vip__envelope,
+  .vip_envelope {
+    opacity: 0 !important;
+  }
 }
 </style>
