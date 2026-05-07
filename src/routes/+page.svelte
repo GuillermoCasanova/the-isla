@@ -126,8 +126,8 @@ const backgroundVideoSrc = "/home-hero.mp4";
   z-index: 0;
   pointer-events: none;
   opacity: 0.1;
-  background: white;
-  filter: grayscale(1) brightness(1);
+  background: rgb(231, 230, 230);
+  filter: grayscale(1) brightness(0.8);
 }
 
 .home__content {
@@ -150,7 +150,7 @@ const backgroundVideoSrc = "/home-hero.mp4";
   max-height: min(50vh, 320px);
   display: block;
   flex-shrink: 0;
-  filter: drop-shadow(0 2px 24px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 2px 24px rgba(0, 0, 0, 0.3));
 }
 @media screen and (min-width: 768px) {
   .home__logo {
