@@ -32,40 +32,44 @@ function vipRoot() {
           style="
             --vip-card-start-y: 165px;
             --vip-reveal-duration: 1600ms;
+            --vip-form-delay-after-envelope: 1s;
+            --vip-form-fade-duration: 450ms;
           "
         >
           <div class="vip__card-column">
-            <article
-              class="vip-card"
-            >
-              <h1 class="visually-hidden">
-                Invitación VIP — La Isla Fashion Show
-              </h1>
-              <img
-                class="vip-card__img"
-                src={cardImg}
-                alt="Invitación VIP para La Isla Fashion Show"
-                width="1215"
-                height="811"
-              />
-            </article>
-          </div>
+            <div class="vip__card-stack">
+              <article
+                class="vip-card"
+              >
+                <h1 class="visually-hidden">
+                  Invitación VIP — La Isla Fashion Show
+                </h1>
+                <img
+                  class="vip-card__img"
+                  src={cardImg}
+                  alt="Invitación VIP para La Isla Fashion Show"
+                  width="1215"
+                  height="811"
+                />
+              </article>
 
-          <div
-            class="vip__envelope vip_envelope"
-            aria-hidden="true"
-          >
-            <img
-              class="vip__envelope-img"
-              src={envelopeImg}
-              alt=""
-              width="1322"
-              height="751"
-            />
-          </div>
+              <div
+                class="vip__envelope vip_envelope"
+                aria-hidden="true"
+              >
+                <img
+                  class="vip__envelope-img"
+                  src={envelopeImg}
+                  alt=""
+                  width="1322"
+                  height="751"
+                />
+              </div>
+            </div>
 
-          <div class="vip__form" style="height: 10rem">
-            <div class="klaviyo-form-RXCRDS"></div>
+            <div class="vip__form">
+              <div class="klaviyo-form-RXCRDS"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -77,7 +81,7 @@ function vipRoot() {
 <style>
 .vip {
   box-sizing: border-box;
-  background: rgb(0, 0, 0);
+  background: rgba(223, 217, 201, 1);
   color: #a8b4c4;
 }
 
@@ -93,19 +97,6 @@ function vipRoot() {
   left: 0;
   width: 100%;
   z-index: 2;
-}
-.home__video {
-  inset: 0;
-  width: 100%;
-  height: 100vh;
-  object-fit: cover;
-  object-position: center;
-  z-index: -1;
-  top: 0;
-  z-index: 0;
-  position: sticky;
-  pointer-events: none;
-  filter: grayscale(1) brightness(0.1);
 }
 
 .visually-hidden {
@@ -160,13 +151,13 @@ function vipRoot() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
   bottom: -3rem;
   position: relative;
-  padding-top: clamp(0.5rem, 3vh, 2rem);
+  padding-bottom: clamp(1rem, 4vh, 2.5rem);
 }
 
 .vip__card-column {
@@ -175,8 +166,15 @@ function vipRoot() {
   width: min(80vw, 640px);
   margin-top: 3rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
+}
+
+/* Card static; envelope rises then fades (absolute so Klaviyo never reflows it) */
+.vip__card-stack {
+  position: relative;
+  width: 100%;
 }
 
 .vip-card {
@@ -189,31 +187,34 @@ function vipRoot() {
   border-radius: 2px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
   line-height: 0;
-  will-change: transform;
-  transform: translate3d(0, var(--vip-card-start-y, 165px), 0);
-  animation: vip-card-rise var(--vip-reveal-duration, 1600ms) cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .vip-card__img {
   display: block;
   width: 100%;
   height: auto;
+  margin-top: 0;
 }
 
-/* In flow, overlapping the card — only .vip-card gets a GSAP y transform */
+/* Overlaps card only; out of document flow so form height cannot shift it */
 .vip__envelope,
 .vip_envelope {
-  position: relative;
+  position: absolute;
   z-index: 2;
+  left: 50%;
+  top: clamp(2.25rem, 18%, 6.5rem);
   width: min(100vw, 760px);
-  max-width: 100%;
-  margin: clamp(-7.5rem, -18vw, -3.5rem) 0 0;
+  max-width: none;
+  transform: translateX(-50%);
+  margin: 0;
   pointer-events: none;
   filter: drop-shadow(0 -4px 24px rgba(0, 0, 0, 0.25));
   line-height: 0;
-  will-change: opacity;
+  will-change: opacity, transform;
   opacity: 1;
-  animation: vip-envelope-fade var(--vip-reveal-duration, 1600ms) ease-out forwards;
+  animation:
+    vip-envelope-rise var(--vip-reveal-duration, 1600ms) cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
+    vip-envelope-fade var(--vip-reveal-duration, 1600ms) ease-out forwards;
 }
 
 .vip__envelope-img {
@@ -223,17 +224,42 @@ function vipRoot() {
 }
 
 .vip__form {
-  width: min(92vw, 640px);
-  margin-top: clamp(1.25rem, 4vh, 2.5rem);
-  z-index: 3;
+  width: 100%;
+  align-self: stretch;
+  margin-top: 50px;
+  position: relative;
+  z-index: 1;
+  min-height: 10rem;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  animation: vip-form-reveal var(--vip-form-fade-duration, 450ms) ease forwards;
+  animation-delay: calc(
+    var(--vip-reveal-duration, 1600ms) + var(--vip-form-delay-after-envelope, 1s)
+  );
 }
 
-@keyframes vip-card-rise {
+@keyframes vip-form-reveal {
   from {
-    transform: translate3d(0, var(--vip-card-start-y, 165px), 0);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
   to {
-    transform: translate3d(0, 0px, 0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+@keyframes vip-envelope-rise {
+  from {
+    transform: translateX(-50%)
+      translate3d(0, calc(-1 * var(--vip-card-start-y, 165px)), 0);
+  }
+  to {
+    transform: translateX(-50%) translate3d(0, 0, 0);
   }
 }
 
@@ -249,20 +275,182 @@ function vipRoot() {
   }
 }
 
+/* Klaviyo embed — match La Isla typography & VIP page palette */
+.vip__form :global(.klaviyo-form-RXCRDS),
+.vip__form :global(form.klaviyo-form),
+.vip__form :global(form[data-testid="klaviyo-form-RXCRDS"]) {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: var(--level3, 1rem) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 2px !important;
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #3a3a38 !important;
+  font-family: var(--primary-font-family) !important;
+  font-size: var(--normal, 1rem) !important;
+  line-height: var(--line-height-double, 1.5) !important;
+  overflow: visible !important;
+}
+
+.vip__form :global(form.klaviyo-form h1),
+.vip__form :global(form.klaviyo-form h2),
+.vip__form :global(form.klaviyo-form h3),
+.vip__form :global(form.klaviyo-form h4),
+.vip__form :global(form.klaviyo-form [id^="rich-text"] h3) {
+  font-family: var(--font-isla-00260) !important;
+  font-weight: 500 !important;
+  font-size: clamp(0.75rem, 2.4vw, 0.95rem) !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #2c2c2a !important;
+  margin: 0 0 var(--level2, 0.75rem) !important;
+  line-height: var(--line-height, 1.25) !important;
+}
+
+.vip__form :global(form.klaviyo-form [id^="rich-text"] strong) {
+  font-family: var(--font-isla-00260) !important;
+  font-weight: 500 !important;
+  font-size: clamp(0.75rem, 2.4vw, 0.95rem) !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: rgba(73, 109, 182, 1) !important;
+  margin: 0 0 var(--level2, 0.75rem) !important;
+  line-height: var(--line-height, 1.25) !important;
+}
+
+.vip__form :global(form.klaviyo-form label),
+.vip__form :global(form.klaviyo-form .klaviyo-field-label) {
+  font-family: var(--secondary-font-family) !important;
+  font-size: var(--micro, 0.9rem) !important;
+  letter-spacing: 0.04em !important;
+  color: #4a4a46 !important;
+  text-transform: none !important;
+}
+
+.vip__form :global(form.klaviyo-form input[type="checkbox"]),
+.vip__form :global(form.klaviyo-form input[type="radio"]) {
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 0.5rem 0 0 !important;
+  accent-color: var(--accent-color, #b75656) !important;
+}
+
+.vip__form :global(form.klaviyo-form input[type="email"]),
+.vip__form :global(form.klaviyo-form input[type="text"]),
+.vip__form :global(form.klaviyo-form input[type="tel"]),
+.vip__form :global(form.klaviyo-form textarea),
+.vip__form :global(form.klaviyo-form select) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0.35rem 0 0 !important;
+  padding: var(--level3, 1rem) var(--level4, 1.5rem) !important;
+  font-family: var(--secondary-font-family) !important;
+  font-size: var(--normal, 1rem) !important;
+  color: #2c2c2a !important;
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid rgba(44, 44, 42, 0.18) !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: border-color var(--duration-default, 200ms) var(--primary-easing, ease),
+    background-color var(--duration-default, 200ms) var(--primary-easing, ease) !important;
+}
+
+.vip__form :global(form.klaviyo-form input:focus),
+.vip__form :global(form.klaviyo-form textarea:focus),
+.vip__form :global(form.klaviyo-form select:focus) {
+  border-color: var(--accent-color, #b75656) !important;
+  background-color: #fff !important;
+}
+
+.vip__form :global(form.klaviyo-form input::placeholder),
+.vip__form :global(form.klaviyo-form textarea::placeholder) {
+  color: #888 !important;
+  opacity: 1 !important;
+}
+
+.vip__form :global(form.klaviyo-form button[type="submit"]),
+.vip__form :global(form.klaviyo-form button.klaviyo-form-button[type="submit"]),
+.vip__form :global(form.klaviyo-form [type="submit"]) {
+  width: 100% !important;
+  margin-top: var(--level4, 1.5rem) !important;
+  padding: var(--level4, 1.5rem) var(--level5, 2rem) !important;
+  font-family: var(--font-isla-00260) !important;
+  font-size: clamp(0.7rem, 2vw, 0.85rem) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: #fff !important;
+  background-color: rgba(74, 110, 183, 1) !important;
+  border: none !important;
+  border-radius: 2px !important;
+  cursor: pointer !important;
+  box-shadow: 0 8px 24px rgba(74, 110, 183, 0.32) !important;
+}
+
+.vip__form :global(form.klaviyo-form button.klaviyo-form-button[type="button"]) {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  padding-left: var(--level5, 2rem) !important;
+  padding-right: var(--level5, 2rem) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.vip__form :global(form.klaviyo-form button[type="submit"]:hover),
+.vip__form :global(form.klaviyo-form button.klaviyo-form-button[type="submit"]:hover) {
+  filter: brightness(1.05) !important;
+}
+
+.vip__form :global(form.klaviyo-form button.klaviyo-form-button[type="button"]:hover) {
+  filter: brightness(1.05) !important;
+}
+
+.vip__form :global(form.klaviyo-form a) {
+  color: var(--accent-color, #b75656) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+.vip__form :global(form.klaviyo-form p),
+.vip__form :global(form.klaviyo-form .ql-editor) {
+  font-family: var(--primary-font-family) !important;
+  color: #4a4a46 !important;
+  font-size: var(--micro, 0.9rem) !important;
+  margin: 0 0 var(--level2, 0.75rem) !important;
+}
+
+.vip__form :global(form.klaviyo-form .needsclick) {
+  font-family: inherit !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .vip-card,
   .vip__envelope,
   .vip_envelope {
     animation: none !important;
   }
 
-  .vip-card {
-    transform: translate3d(0, 0px, 0) !important;
-  }
-
   .vip__envelope,
   .vip_envelope {
     opacity: 0 !important;
+    transform: translateX(-50%) translate3d(0, 0, 0) !important;
+  }
+
+  .vip__form {
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
   }
 }
 </style>

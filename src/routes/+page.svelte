@@ -1,6 +1,6 @@
 <script>
-const backgroundVideoSrc =
-  "https://public-assets.content-platform.envatousercontent.com/4c480208-1b25-4c61-b568-61746f5b908f/7e7c95f4-ba97-4589-aed4-e37f9f47392d/4c480208-1b25-4c61-b568-61746f5b908f/preview_540p_crf22_higher_quality.mp4";
+/** Local hero loop (from Clips/IMG_4755.MOV, transcoded to H.264 for browsers). */
+const backgroundVideoSrc = "/home-hero.mp4";
 </script>
 
 <svelte:head>
@@ -123,7 +123,7 @@ const backgroundVideoSrc =
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center top;
   z-index: 0;
   pointer-events: none;
   filter: grayscale(0.5) brightness(0.3);
@@ -141,7 +141,7 @@ const backgroundVideoSrc =
 }
 
 .home__logo {
-  width: min(30vw, 360px);
+  width: min(15rem, 360px);
   max-width: 100%;
   height: auto;
   max-height: min(50vh, 320px);
