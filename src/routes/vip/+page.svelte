@@ -107,7 +107,7 @@ onMount(() => {
       <section class="vip-reveal" aria-label="Invitación VIP">
         <header class="vip__header">
           <span class="vip__header-left">LA ISLA FASHION SHOW</span>
-          <span class="vip__header-right">06.28.26</span>
+          <span class="vip__header-right">06.27.26</span>
         </header>
 
         <div class="vip__stage">

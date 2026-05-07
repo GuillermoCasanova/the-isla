@@ -5,7 +5,7 @@ const backgroundVideoSrc = "/home-hero.mp4";
 
 <svelte:head>
   <title>La Isla Fashion Show</title>
-  <meta name="description" content="La Isla Fashion Show — June 28, 2026." />
+  <meta name="description" content="La Isla Fashion Show — June 27, 2026." />
 </svelte:head>
 
 <div class="home">
