@@ -142,14 +142,20 @@ const backgroundVideoSrc = "/home-hero.mp4";
 }
 
 .home__logo {
-  min-width: 18rem;
+  min-width: 17rem;
   max-width: 100%;
-  width: 20vw;
+  width: 80%;
   height: auto;
+  max-width: 20rem;
   max-height: min(50vh, 320px);
   display: block;
   flex-shrink: 0;
   filter: drop-shadow(0 2px 24px rgba(0, 0, 0, 0.45));
+}
+@media screen and (min-width: 768px) {
+  .home__logo {
+    max-width: 16rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
