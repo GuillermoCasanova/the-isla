@@ -1,0 +1,323 @@
+.vip {
+  box-sizing: border-box;
+  background: rgb(0, 0, 0);
+  color: #a8b4c4;
+}
+
+.vip__hero {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 100svh;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.vip__hero-inner {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem clamp(1rem, 4vw, 2rem) clamp(1.5rem, 4vh, 2.5rem);
+}
+
+.vip-reveal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.vip__header {
+  position: fixed;
+  padding: 2rem;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
+  letter-spacing: 0.06em;
+  font-family: var(--font-isla-00260);
+  font-weight: 500;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  color: #4a6eb7;
+}
+
+.vip__header-right {
+  white-space: nowrap;
+}
+
+.vip__stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  bottom: -3rem;
+  position: relative;
+  padding-bottom: clamp(1rem, 4vh, 2.5rem);
+}
+
+.vip__card-column {
+  position: relative;
+  z-index: 1;
+  width: min(80vw, 640px);
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Card static; envelope rises then fades (absolute so Klaviyo never reflows it) */
+.vip__card-stack {
+  position: relative;
+  width: 100%;
+}
+
+.vip-card {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: visible;
+  border-radius: 2px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  line-height: 0;
+}
+
+.vip-card__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 0;
+}
+
+/* Overlaps card only; out of document flow so form height cannot shift it */
+.vip__envelope,
+.vip_envelope {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: clamp(2.25rem, 18%, 6.5rem);
+  width: min(100vw, 760px);
+  max-width: none;
+  margin: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 -4px 24px rgba(0, 0, 0, 0.25));
+  line-height: 0;
+}
+
+.vip__envelope-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.vip__form {
+  width: 100%;
+  align-self: stretch;
+  margin-top: 50px;
+  position: relative;
+  z-index: 1;
+  min-height: 10rem;
+  box-sizing: border-box;
+}
+
+/* Klaviyo embed — match La Isla typography & VIP page palette */
+.vip__form .klaviyo-form-RXCRDS,
+.vip__form form.klaviyo-form,
+.vip__form form[data-testid="klaviyo-form-RXCRDS"] {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: var(--level3, 1rem) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 2px !important;
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #fafaf9 !important;
+  font-family: var(--primary-font-family) !important;
+  font-size: var(--normal, 1rem) !important;
+  line-height: var(--line-height-double, 1.5) !important;
+  overflow: visible !important;
+}
+
+.vip__form form.klaviyo-form h1,
+.vip__form form.klaviyo-form h2,
+.vip__form form.klaviyo-form h3,
+.vip__form form.klaviyo-form h4,
+.vip__form form.klaviyo-form [id^="rich-text"] h3 {
+  font-family: var(--font-isla-00260) !important;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #fdfdfd !important;
+  margin: 0 0 var(--level2, 0.75rem) !important;
+  text-align: center !important;
+  line-height: var(--line-height, 1.25) !important;
+}
+
+.vip__form form.klaviyo-form [id^="rich-text"] strong {
+  font-family: var(--font-isla-00260) !important;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: white !important;
+  margin: 0 0 var(--level2, 0.75rem) !important;
+  line-height: var(--line-height, 1.25) !important;
+}
+
+.vip__form form.klaviyo-form label,
+.vip__form form.klaviyo-form .klaviyo-field-label {
+  font-family: var(--secondary-font-family) !important;
+  font-size: var(--micro, 0.9rem) !important;
+  letter-spacing: 0.04em !important;
+  color: white !important;
+  text-transform: none !important;
+}
+
+.vip__form form.klaviyo-form input[type="checkbox"],
+.vip__form form.klaviyo-form input[type="radio"] {
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 0.5rem 0 0 !important;
+  accent-color: var(--accent-color, #b75656) !important;
+}
+
+.vip__form form.klaviyo-form input[type="email"],
+.vip__form form.klaviyo-form input[type="text"],
+.vip__form form.klaviyo-form input[type="tel"],
+.vip__form form.klaviyo-form textarea,
+.vip__form form.klaviyo-form select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0.35rem 0 0 !important;
+  padding: var(--level3, 1rem) var(--level4, 1.5rem) !important;
+  font-family: var(--secondary-font-family) !important;
+  font-size: var(--normal, 1rem) !important;
+  color: #2c2c2a !important;
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid rgba(44, 44, 42, 0.18) !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: border-color var(--duration-default, 200ms)
+      var(--primary-easing, ease),
+    background-color var(--duration-default, 200ms) var(--primary-easing, ease) !important;
+}
+
+.vip__form form.klaviyo-form input:focus,
+.vip__form form.klaviyo-form textarea:focus,
+.vip__form form.klaviyo-form select:focus {
+  border-color: var(--accent-color, #b75656) !important;
+  background-color: #fff !important;
+}
+
+.vip__form form.klaviyo-form input::placeholder,
+.vip__form form.klaviyo-form textarea::placeholder {
+  color: #888 !important;
+  opacity: 1 !important;
+}
+
+.vip__form form.klaviyo-form button[type="submit"],
+.vip__form form.klaviyo-form button.klaviyo-form-button[type="submit"],
+.vip__form form.klaviyo-form [type="submit"] {
+  width: 100% !important;
+  margin-top: var(--level4, 1.5rem) !important;
+  padding: var(--level4, 1.5rem) var(--level5, 2rem) !important;
+  font-family: var(--font-isla-00260) !important;
+  font-size: clamp(0.7rem, 2vw, 0.85rem) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: #fff !important;
+  background-color: rgba(74, 110, 183, 1) !important;
+  border: none !important;
+  border-radius: 2px !important;
+  cursor: pointer !important;
+  box-shadow: 0 8px 24px rgba(74, 110, 183, 0.32) !important;
+}
+
+.vip__form form.klaviyo-form button.klaviyo-form-button[type="button"] {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  padding-left: var(--level5, 2rem) !important;
+  padding-right: var(--level5, 2rem) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  box-sizing: border-box !important;
+  text-transform: uppercase !important;
+  color: white !important;
+  font-family: var(--font-isla-00260) !important;
+}
+
+.vip__form form.klaviyo-form button[type="submit"]:hover,
+.vip__form form.klaviyo-form button.klaviyo-form-button[type="submit"]:hover {
+  filter: brightness(1.05) !important;
+}
+
+.vip__form form.klaviyo-form button.klaviyo-form-button[type="button"]:hover {
+  filter: brightness(1.05) !important;
+}
+
+.vip__form form.klaviyo-form a {
+  color: var(--accent-color, #b75656) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+.vip__form form.klaviyo-form p,
+.vip__form form.klaviyo-form .ql-editor {
+  font-family: var(--primary-font-family) !important;
+  color: white !important;
+  font-size: var(--micro, 0.9rem) !important;
+  margin: 0 0 var(--level2, 0.75rem) !important;
+}
+
+.vip__form form.klaviyo-form .needsclick {
+  font-family: inherit !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vip__envelope,
+  .vip_envelope {
+    opacity: 0 !important;
+  }
+
+  .vip__form {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+}
