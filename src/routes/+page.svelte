@@ -142,8 +142,9 @@ const backgroundVideoSrc = "/home-hero.mp4";
 }
 
 .home__logo {
-  width: min(15rem, 360px);
+  min-width: 25rem;
   max-width: 100%;
+  width: 25vw;
   height: auto;
   max-height: min(50vh, 320px);
   display: block;
