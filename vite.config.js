@@ -6,6 +6,11 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false,
+    // iCloud / synced Documents folders often break native FS watchers; polling fixes missed HMR.
+    watch: {
+      usePolling: true,
+      interval: 150,
+    },
   },
   build: {
     sourcemap: true,
