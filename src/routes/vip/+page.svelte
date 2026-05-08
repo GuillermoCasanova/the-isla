@@ -1,10 +1,11 @@
 <script>
 import "./vip-page.css";
 import { onMount } from "svelte";
+import { page } from "$app/stores";
 import { gsap } from "gsap";
 import cardImg from "$lib/assets/Card.png";
-import envelopeBackImg from "$lib/assets/WEB-ENVELOPE-BACK.png";
-import envelopeFrontImg from "$lib/assets/WEB-ENVELOPE-FRONT.png";
+import envelopeBackImg from "$lib/assets/WEB-ENVELOPE-BACK.webp";
+import envelopeFrontImg from "$lib/assets/WEB-ENVELOPE-FRONT.webp";
 
 const backgroundVideoSrc =
   "https://public-assets.content-platform.envatousercontent.com/4c480208-1b25-4c61-b568-61746f5b908f/7e7c95f4-ba97-4589-aed4-e37f9f47392d/4c480208-1b25-4c61-b568-61746f5b908f/preview_540p_crf22_higher_quality.mp4";
@@ -94,11 +95,28 @@ onMount(() => {
 
   return () => ctx.revert();
 });
+
+const description = "La Isla Fashion Show — invitación VIP.";
+const ogTitle = "VIP — La Isla Fashion Show";
+
+$: canonicalUrl = `${$page.url.origin}${$page.url.pathname}`;
+$: ogImageUrl = `${$page.url.origin}/og_image_vip.png`;
 </script>
 
 <svelte:head>
-  <title>VIP — La Isla Fashion Show</title>
-  <meta name="description" content="La Isla Fashion Show — invitación VIP." />
+  <title>{ogTitle}</title>
+  <meta name="description" content={description} />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={ogTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={ogImageUrl} />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={ogTitle} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImageUrl} />
 </svelte:head>
 
 <div class="vip" id="vip-page" bind:this={rootEl}>
@@ -135,8 +153,8 @@ onMount(() => {
                   class="vip-card__img"
                   src={cardImg}
                   alt="Invitación VIP para La Isla Fashion Show"
-                  width="1215"
-                  height="811"
+                  width="3159"
+                  height="2108"
                 />
               </article>
 

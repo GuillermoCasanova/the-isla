@@ -1,11 +1,30 @@
 <script>
+import { page } from "$app/stores";
+
 /** Local hero loop (from Clips/IMG_4755.MOV, transcoded to H.264 for browsers). */
 const backgroundVideoSrc = "/home-hero.mp4";
+
+const description = "La Isla Fashion Show — June 27, 2026.";
+const ogTitle = "La Isla Fashion Show";
+
+$: canonicalUrl = `${$page.url.origin}${$page.url.pathname}`;
+$: ogImageUrl = `${$page.url.origin}/og_image.png`;
 </script>
 
 <svelte:head>
-  <title>La Isla Fashion Show</title>
-  <meta name="description" content="La Isla Fashion Show — June 27, 2026." />
+  <title>{ogTitle}</title>
+  <meta name="description" content={description} />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={ogTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={ogImageUrl} />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={ogTitle} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImageUrl} />
 </svelte:head>
 
 <div class="home">
