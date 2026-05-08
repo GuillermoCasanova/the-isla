@@ -1,9 +1,10 @@
 <script>
 import "./vip-page.css";
-import { onMount } from "svelte";
+import { onMount, tick } from "svelte";
 import { page } from "$app/stores";
 import { gsap } from "gsap";
-import cardImg from "$lib/assets/Card.png";
+import { waitForLoadingOverlayHidden } from "$lib/app-loading.js";
+import cardImg from "$lib/assets/card.jpg";
 import envelopeBackImg from "$lib/assets/WEB-ENVELOPE-BACK.webp";
 import envelopeFrontImg from "$lib/assets/WEB-ENVELOPE-FRONT.webp";
 
@@ -12,7 +13,7 @@ const backgroundVideoSrc =
 
 const INTRO_DURATION = 0.85;
 const ENVELOPE_EXIT_DURATION = 0.95;
-const FORM_FADE_DURATION = 0.45;
+const FORM_FADE_DURATION = 0.5;
 
 let rootEl;
 let cardEl;
@@ -21,79 +22,145 @@ let envelopeFrontEl;
 let formEl;
 
 onMount(() => {
-  const root = rootEl;
-  const envelopeLayers = [envelopeBackEl, envelopeFrontEl];
-  if (!root || !cardEl || !envelopeBackEl || !envelopeFrontEl || !formEl)
-    return;
+  let cancelled = false;
+  /** @type {(() => void) | undefined} */
+  let revertGsap;
 
-  const reducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)",
-  ).matches;
+  async function boot() {
+    await tick();
+    if (cancelled) return;
 
-  if (reducedMotion) {
-    gsap.set(cardEl, { opacity: 1, scale: 1 });
-    gsap.set(envelopeLayers, {
-      opacity: 0,
-      scale: 1,
-      xPercent: -50,
-      yPercent: 0,
-      pointerEvents: "none",
-    });
-    gsap.set(formEl, {
-      visibility: "visible",
-      pointerEvents: "auto",
-    });
-    return;
+    let attempts = 0;
+    while (
+      attempts < 40 &&
+      (!rootEl || !cardEl || !envelopeBackEl || !envelopeFrontEl || !formEl)
+    ) {
+      await new Promise((r) => requestAnimationFrame(r));
+      attempts += 1;
+      if (cancelled) return;
+    }
+
+    if (cancelled) return;
+
+    const ctrl = prepareVipGsap();
+    if (!ctrl) return;
+
+    // Same moment as app-shell-ready / finish(): overlay has finished fading.
+    await waitForLoadingOverlayHidden();
+    if (cancelled) {
+      ctrl.revert();
+      return;
+    }
+
+    ctrl.playIntro();
+    revertGsap = ctrl.revert;
   }
 
-  const ctx = gsap.context(() => {
-    gsap.set(formEl, {
-      autoAlpha: 0,
-      pointerEvents: "none",
-    });
+  void boot();
 
-    gsap.set([cardEl, ...envelopeLayers], {
-      opacity: 1,
-      scale: 0.9,
-      transformOrigin: "50% 50%",
-    });
+  return () => {
+    cancelled = true;
+    revertGsap?.();
+  };
 
-    gsap.set(envelopeLayers, {
-      xPercent: -50,
-      yPercent: 0,
-    });
+  /**
+   * Phase 1 (under shell loader): gsap.set only — hidden behind #app-shell-loader.
+   * Phase 2 (after waitForLoadingOverlayHidden): timeline plays — fires when shell dispatches app-shell-ready.
+   */
+  function prepareVipGsap() {
+    const root = rootEl;
+    const envelopeLayers = [envelopeBackEl, envelopeFrontEl];
+    if (!root || !cardEl || !envelopeBackEl || !envelopeFrontEl || !formEl)
+      return null;
 
-    const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
-    tl.to([cardEl, ...envelopeLayers], {
-      scale: 1,
-      duration: INTRO_DURATION,
-    });
+    if (reducedMotion) {
+      const ctx = gsap.context(() => {
+        gsap.set(cardEl, { opacity: 1, scale: 1 });
+        gsap.set(envelopeLayers, {
+          opacity: 0,
+          scale: 1,
+          xPercent: -50,
+          yPercent: 0,
+          pointerEvents: "none",
+        });
+        gsap.set(formEl, {
+          visibility: "visible",
+          pointerEvents: "auto",
+        });
+      }, root);
+      return {
+        playIntro() {},
+        revert: () => ctx.revert(),
+      };
+    }
 
-    tl.to(
-      envelopeLayers,
-      {
-        yPercent: 40,
-        opacity: 0,
-        duration: ENVELOPE_EXIT_DURATION,
-        ease: "power2.inOut",
+    const settleCtx = gsap.context(() => {
+      gsap.set(formEl, {
+        autoAlpha: 0,
+        pointerEvents: "none",
+      });
+
+      gsap.set([cardEl, ...envelopeLayers], {
+        opacity: 1,
+        scale: 0.9,
+        transformOrigin: "50% 50%",
+      });
+
+      gsap.set(envelopeLayers, {
+        xPercent: -50,
+        yPercent: 0,
+      });
+    }, root);
+
+    let playCtx;
+
+    return {
+      playIntro() {
+        playCtx = gsap.context(() => {
+          const tl = gsap.timeline({ defaults: { ease: "power2.Out" } });
+
+          tl.to([cardEl, ...envelopeLayers], {
+            scale: 1,
+            duration: INTRO_DURATION,
+          });
+
+          tl.to(envelopeLayers, {
+            yPercent: 40,
+            duration: ENVELOPE_EXIT_DURATION,
+            ease: "power2.inOut",
+          });
+          tl.to(
+            envelopeLayers,
+            {
+              opacity: 0,
+              duration: ENVELOPE_EXIT_DURATION * 0.65,
+              ease: "power2.inOut",
+            },
+            "-=0.7", // start opacity fade at the same time as yPercent or adjust timing if needed
+          );
+
+          tl.to(
+            formEl,
+            {
+              autoAlpha: 1,
+              pointerEvents: "auto",
+              duration: FORM_FADE_DURATION,
+              ease: "power2.out",
+            },
+            "-=0.1",
+          );
+        }, root);
       },
-      ">",
-    );
-
-    tl.to(
-      formEl,
-      {
-        autoAlpha: 1,
-        pointerEvents: "auto",
-        duration: FORM_FADE_DURATION,
-        ease: "power2.out",
+      revert: () => {
+        playCtx?.revert();
+        settleCtx.revert();
       },
-      ">",
-    );
-  }, root);
-
-  return () => ctx.revert();
+    };
+  }
 });
 
 const description = "La Isla Fashion Show — invitación VIP.";

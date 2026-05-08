@@ -46,13 +46,8 @@ beforeNavigate(() => {
   <slot />
 </main>
 
-
-
-
-
 <style>
 @import "../styles/base.css";
 @import "../styles/grid.css";
-
 
 </style>

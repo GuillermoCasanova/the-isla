@@ -29,7 +29,9 @@
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  padding: 1rem clamp(1rem, 4vw, 2rem) clamp(1.5rem, 4vh, 2.5rem);
+  padding: var(--level3) clamp(var(--level3), 4vw, var(--level5))
+    clamp(var(--level4), 4vh, var(--level6));
+  background-color: rgba(22, 52, 121, 1);
 }
 
 .vip-reveal {
@@ -42,7 +44,9 @@
 
 .vip__header {
   position: fixed;
-  padding: 2rem;
+  padding: var(--level4);
+  padding-left: var(--level4);
+  padding-right: var(--level4);
   top: 0;
   left: 0;
   width: 100%;
@@ -50,14 +54,14 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
+  gap: var(--level3);
   font-size: clamp(0.75rem, 2vw, 0.9rem);
   letter-spacing: 0.06em;
   font-family: var(--font-isla-00260);
   font-weight: 500;
   text-transform: uppercase;
   flex-shrink: 0;
-  color: #4a6eb7;
+  color: rgba(255, 255, 255, 1);
 }
 
 .vip__header-right {
@@ -73,16 +77,16 @@
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
-  bottom: -3rem;
+  bottom: calc(-1 * var(--level7));
   position: relative;
-  padding-bottom: clamp(1rem, 4vh, 2.5rem);
+  padding-bottom: clamp(var(--level3), 4vh, var(--level6));
 }
 
 .vip__card-column {
   position: relative;
   z-index: 1;
   width: min(88vw, 640px);
-  margin-top: 7rem;
+  margin-top: calc(var(--level5) + var(--level5) + var(--level7));
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -150,10 +154,10 @@
 .vip__form {
   width: 100%;
   align-self: stretch;
-  margin-top: 50px;
+  margin-top: calc(var(--level6) + var(--level2));
   position: relative;
   z-index: 1;
-  min-height: 10rem;
+  min-height: calc(5 * var(--level5));
   box-sizing: border-box;
 }
 
@@ -165,7 +169,7 @@
   flex-direction: column !important;
   flex-wrap: nowrap !important;
   align-items: stretch !important;
-  gap: var(--level3, 1rem) !important;
+  gap: var(--level3) !important;
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
@@ -193,7 +197,7 @@
   letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
   color: #fdfdfd !important;
-  margin: 0 0 var(--level2, 0.75rem) !important;
+  margin: 0 0 var(--level2) !important;
   text-align: center !important;
   line-height: var(--line-height, 1.25) !important;
 }
@@ -205,7 +209,7 @@
   letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
   color: white !important;
-  margin: 0 0 var(--level2, 0.75rem) !important;
+  margin: 0 0 var(--level2) !important;
   line-height: var(--line-height, 1.25) !important;
 }
 
@@ -216,13 +220,14 @@
   letter-spacing: 0.04em !important;
   color: white !important;
   text-transform: none !important;
+  text-transform: uppercase !important;
 }
 
 .vip__form form.klaviyo-form input[type="checkbox"],
 .vip__form form.klaviyo-form input[type="radio"] {
   width: auto !important;
   max-width: none !important;
-  margin: 0 0.5rem 0 0 !important;
+  margin: 0 var(--level1) 0 0 !important;
   accent-color: var(--accent-color, #b75656) !important;
 }
 
@@ -235,7 +240,7 @@
   max-width: 100% !important;
   box-sizing: border-box !important;
   margin: 0.35rem 0 0 !important;
-  padding: var(--level3, 1rem) var(--level4, 1.5rem) !important;
+  padding: var(--level3) var(--level4) !important;
   font-family: var(--secondary-font-family) !important;
   font-size: var(--normal, 1rem) !important;
   color: #2c2c2a !important;
@@ -266,15 +271,15 @@
 .vip__form form.klaviyo-form button.klaviyo-form-button[type="submit"],
 .vip__form form.klaviyo-form [type="submit"] {
   width: 100% !important;
-  margin-top: var(--level4, 1.5rem) !important;
-  padding: var(--level4, 1.5rem) var(--level5, 2rem) !important;
+  margin-top: var(--level4) !important;
+  padding: var(--level6) var(--level5) !important;
   font-family: var(--font-isla-00260) !important;
   font-size: clamp(0.7rem, 2vw, 0.85rem) !important;
   font-weight: 500 !important;
   letter-spacing: 0.1em !important;
   text-transform: uppercase !important;
-  color: #fff !important;
-  background-color: rgba(74, 110, 183, 1) !important;
+  background-color: #fff !important;
+  color: rgba(74, 110, 183, 1) !important;
   border: none !important;
   border-radius: 2px !important;
   cursor: pointer !important;
@@ -282,16 +287,18 @@
 }
 
 .vip__form form.klaviyo-form button.klaviyo-form-button[type="button"] {
-  padding-top: 10px !important;
-  padding-bottom: 10px !important;
-  padding-left: var(--level5, 2rem) !important;
-  padding-right: var(--level5, 2rem) !important;
+  padding-top: var(--level3) !important;
+  padding-bottom: var(--level3) !important;
+  padding-left: var(--level5) !important;
+  padding-right: var(--level5) !important;
   height: auto !important;
   min-height: 0 !important;
   box-sizing: border-box !important;
   text-transform: uppercase !important;
-  color: white !important;
+  background-color: white !important;
+  color: rgba(74, 110, 183, 1) !important;
   font-family: var(--font-isla-00260) !important;
+  letter-spacing: 0.1em !important;
 }
 
 .vip__form form.klaviyo-form button[type="submit"]:hover,
@@ -314,7 +321,7 @@
   font-family: var(--primary-font-family) !important;
   color: white !important;
   font-size: var(--micro, 0.9rem) !important;
-  margin: 0 0 var(--level2, 0.75rem) !important;
+  margin: 0 0 var(--level2) !important;
 }
 
 .vip__form form.klaviyo-form .needsclick {
