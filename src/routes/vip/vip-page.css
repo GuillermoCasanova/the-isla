@@ -31,7 +31,7 @@
   flex-direction: column;
   padding: var(--level3) clamp(var(--level3), 4vw, var(--level5))
     clamp(var(--level4), 4vh, var(--level6));
-  background-color: rgba(22, 52, 121, 1);
+  background-color: rgb(27 50 104);
 }
 
 .vip-reveal {

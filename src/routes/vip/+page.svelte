@@ -191,7 +191,9 @@ $: ogImageUrl = `${$page.url.origin}/og_image_vip.png`;
     <div class="vip__hero-inner">
       <section class="vip-reveal" aria-label="Invitación VIP">
         <header class="vip__header">
-          <span class="vip__header-left">LA ISLA FASHION SHOW</span>
+          <span class="vip__header-left"
+            ><a href="/">LA ISLA FASHION SHOW</a></span
+          >
           <span class="vip__header-right">06.27.26</span>
         </header>
 
