@@ -1,14 +1,22 @@
 <script>
 import { page } from "$app/stores";
+import ItinerarioModal from "../components/itinerario-modal.svelte";
 
 /** Local hero loop (from Clips/IMG_4755.MOV, transcoded to H.264 for browsers). */
 const backgroundVideoSrc = "/home-hero.mp4";
 
-const description = "La Isla Fashion Show — June 27, 2026.";
+const description = "La Isla Fashion Show — June 26–28, 2026.";
 const ogTitle = "La Isla Fashion Show";
+
+let itinerarioModal;
+let itinerarioOpen = false;
 
 $: canonicalUrl = `${$page.url.origin}${$page.url.pathname}`;
 $: ogImageUrl = `${$page.url.origin}/og_image.png`;
+
+function openItinerario(event) {
+  itinerarioModal?.open(event.currentTarget);
+}
 </script>
 
 <svelte:head>
@@ -39,15 +47,16 @@ $: ogImageUrl = `${$page.url.origin}/og_image.png`;
       aria-hidden="true"
     />
     <div class="home__content">
-      <svg
-        class="home__logo"
-        xmlns="http://www.w3.org/2000/svg"
-        width="200"
-        viewBox="0 0 438 162"
-        fill="none"
-        role="img"
-        aria-label="La Isla Fashion Show"
-      >
+      <div class="home__brand">
+        <svg
+          class="home__logo"
+          xmlns="http://www.w3.org/2000/svg"
+          width="200"
+          viewBox="0 0 438 162"
+          fill="none"
+          role="img"
+          aria-label="La Isla Fashion Show"
+        >
         <path
           d="M57.7294 125.024C57.3899 125.026 57.304 124.856 57.3025 124.602L57.2979 123.838C57.2771 120.358 55.4862 118.926 51.4972 118.95L1.08312 119.252C0.828502 119.253 0.657742 119.084 0.656218 118.83C0.654695 118.575 0.823423 118.404 1.07804 118.403L1.84189 118.398C7.18884 118.366 8.95033 114.876 8.90969 108.086L8.38097 19.7342C8.34034 12.9444 6.53771 9.56022 1.19076 9.59222L0.426911 9.59679C0.172294 9.59831 0.00153394 9.42958 1.02351e-05 9.17497C-0.00151347 8.92035 0.167215 8.74959 0.421832 8.74807L23.8465 8.60789C24.1012 8.60636 24.2719 8.77509 24.2734 9.02971C24.275 9.28432 24.1062 9.45508 23.8516 9.45661L23.0878 9.46118C17.9954 9.49165 16.2334 12.8972 16.2741 19.687L16.8028 108.039C16.8434 114.829 18.6466 118.298 24.2481 118.264L36.979 118.188C51.0677 118.104 56.4396 108.056 58.807 92.3402C58.8059 92.1705 58.8898 92.0003 59.2293 91.9982C59.4839 91.9967 59.6542 92.0805 59.6562 92.42L58.1512 124.597C58.1533 124.936 57.984 125.022 57.7294 125.024Z"
           fill="#4A6EB7"
@@ -116,10 +125,26 @@ $: ogImageUrl = `${$page.url.origin}/og_image.png`;
           d="M319.37 160.644C319.227 159.609 318.851 158.046 318.242 155.956L314.57 143.242C314.079 145.265 313.233 148.181 312.031 151.988C310.788 155.901 309.931 158.806 309.461 160.704L306.697 160.72C306.006 155.427 305.182 150.789 304.226 146.805C303.282 142.864 302.498 140.586 301.877 139.972L303.934 139.96C304.761 139.955 305.323 140.24 305.62 140.814C305.704 140.981 305.881 141.666 306.15 142.868C306.667 145.294 307.241 148.421 307.871 152.249C308.109 153.493 308.403 155.365 308.753 157.865L308.769 158.038L311.838 148.597C312.743 145.817 313.191 143.705 313.182 142.26C313.18 141.873 313.104 141.47 312.955 141.053C312.806 140.624 312.599 140.243 312.336 139.91L317.832 139.877C317.344 140.55 317.102 141.216 317.106 141.876C317.109 142.347 317.238 143.053 317.495 143.993L321.316 157.963L323.508 148.857C323.906 147.211 324.202 145.848 324.394 144.769C324.596 143.595 324.696 142.715 324.692 142.129C324.687 141.218 324.478 140.455 324.066 139.84L328.322 139.814C327.573 140.635 326.782 142.341 325.95 144.932C325.446 146.506 324.689 149.395 323.677 153.599C323.269 155.297 322.723 157.64 322.039 160.628L319.37 160.644Z"
           fill="#4A6EB7"
         />
-      </svg>
+        </svg>
+
+        <button
+          type="button"
+          class="itinerario-trigger"
+          aria-haspopup="dialog"
+          aria-expanded={itinerarioOpen}
+          on:click={openItinerario}
+        >
+          Itinerario
+        </button>
+      </div>
     </div>
   </section>
 </div>
+
+<ItinerarioModal
+  bind:this={itinerarioModal}
+  bind:isOpen={itinerarioOpen}
+/>
 
 <style>
 .home {
@@ -144,20 +169,55 @@ $: ogImageUrl = `${$page.url.origin}/og_image.png`;
   object-position: center top;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.1;
-  background: rgb(231, 230, 230);
-  filter: grayscale(1) brightness(0.8);
+  opacity: 0.4;
+  background: transparent;
+  filter: grayscale(0.5) brightness(0.95) contrast(1.05);
+}
+
+.home__hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .home__content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: clamp(1.5rem, 5vw, 3rem);
   box-sizing: border-box;
+}
+
+.home__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.75rem, 5vh, 2.75rem);
+}
+
+.itinerario-trigger {
+  font-family: var(--font-isla-00260);
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4a6eb7;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  transition: color 0.25s ease;
+}
+
+.itinerario-trigger:hover,
+.itinerario-trigger:focus-visible {
+  color: #fff;
+  outline: none;
 }
 
 .home__logo {
