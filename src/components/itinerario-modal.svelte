@@ -1,19 +1,24 @@
 <script>
 import { browser } from "$app/environment";
 import { trapFocus, removeTrapFocus } from "$lib/trapFocus";
-import { onDestroy, tick } from "svelte";
+import { onDestroy, onMount, tick } from "svelte";
+
+const MOBILE_QUERY = "(max-width: 899px)";
 
 const schedules = [
   {
-    src: "/itinerario/jun-26.png",
+    desktopSrc: "/itinerario/jun-26.png",
+    mobileSrc: "/itinerario/jun-26-mobile.png",
     alt: "Itinerario La Isla Fashion Show — 26 de junio, viernes",
   },
   {
-    src: "/itinerario/jun-27.png",
+    desktopSrc: "/itinerario/jun-27.png",
+    mobileSrc: "/itinerario/jun-27-mobile.png",
     alt: "Itinerario La Isla Fashion Show — 27 de junio, sábado",
   },
   {
-    src: "/itinerario/jun-28.png",
+    desktopSrc: "/itinerario/jun-28.png",
+    mobileSrc: "/itinerario/jun-28-mobile.png",
     alt: "Itinerario La Isla Fashion Show — 28 de junio, domingo",
   },
 ];
@@ -25,10 +30,35 @@ let triggerEl;
 let closeEl;
 let contentEl;
 let currentIndex = 0;
+let isMobile = false;
+let mobileQuery;
+
+function syncViewport() {
+  if (!browser) return;
+
+  if (!mobileQuery) {
+    mobileQuery = window.matchMedia(MOBILE_QUERY);
+  }
+
+  isMobile = mobileQuery.matches;
+}
+
+onMount(() => {
+  if (!browser) return;
+
+  mobileQuery = window.matchMedia(MOBILE_QUERY);
+  syncViewport();
+  mobileQuery.addEventListener("change", syncViewport);
+
+  return () => {
+    mobileQuery.removeEventListener("change", syncViewport);
+  };
+});
 
 export async function open(trigger = null) {
   if (!browser) return;
 
+  syncViewport();
   triggerEl = trigger;
   isOpen = true;
   document.body.style.overflow = "hidden";
@@ -81,7 +111,7 @@ function handleKeydown(event) {
     return;
   }
 
-  if (window.innerWidth >= 900) return;
+  if (!isMobile) return;
 
   if (event.key === "ArrowLeft") {
     goPrev();
@@ -169,7 +199,12 @@ onDestroy(() => {
       >
         {#each schedules as schedule}
           <figure class="itinerario-overlay__day">
-            <img src={schedule.src} alt={schedule.alt} decoding="async" />
+            <img
+              class="itinerario-overlay__img"
+              src={isMobile ? schedule.mobileSrc : schedule.desktopSrc}
+              alt={schedule.alt}
+              decoding="async"
+            />
           </figure>
         {/each}
       </div>
@@ -208,8 +243,8 @@ onDestroy(() => {
   z-index: 1;
   display: flex;
   flex-direction: column;
-  width: min(96vw, 72rem);
-  max-height: 92svh;
+  width: min(98vw, 82rem);
+  max-height: 96svh;
   background: #fff;
   box-sizing: border-box;
   pointer-events: auto;
@@ -262,13 +297,13 @@ onDestroy(() => {
 .itinerario-overlay__content {
   display: flex;
   flex-direction: row;
-  gap: 1rem;
-  max-height: calc(92svh - 3.5rem);
+  gap: 0.75rem;
+  max-height: calc(96svh - 3rem);
   overflow-x: auto;
   overflow-y: auto;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 1rem;
-  padding: 0 1rem 1.25rem;
+  scroll-padding-inline: 0.5rem;
+  padding: 0 0.5rem 1rem;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -279,10 +314,11 @@ onDestroy(() => {
   scroll-snap-align: center;
 }
 
-.itinerario-overlay__day img {
+.itinerario-overlay__img {
   display: block;
   width: 100%;
   height: auto;
+  max-width: 100%;
 }
 
 @media screen and (max-width: 899px) {
@@ -349,8 +385,8 @@ onDestroy(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3rem;
-    height: 3rem;
+    width: 2.5rem;
+    height: 2.5rem;
     padding: 0;
     border: none;
     background: transparent;
@@ -372,8 +408,8 @@ onDestroy(() => {
 
   .itinerario-nav__icon {
     display: block;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 1.75rem;
+    height: 1.75rem;
     background-color: #4a6eb7;
     transition: background-color 0.25s ease;
     -webkit-mask: center / contain no-repeat;
@@ -406,7 +442,7 @@ onDestroy(() => {
     gap: 0;
     padding: 0;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 0;
   }
@@ -415,21 +451,20 @@ onDestroy(() => {
     flex: 0 0 100%;
     width: 100%;
     min-width: 100%;
-    height: 100%;
+    height: auto;
+    min-height: 100svh;
     scroll-snap-align: start;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     margin: 0;
     background: #fff;
   }
 
-  .itinerario-overlay__day img {
+  .itinerario-overlay__img {
+    display: block;
     width: 100%;
     height: auto;
-    max-height: 100%;
+    max-width: 100%;
     object-fit: contain;
-    object-position: center;
+    object-position: center top;
   }
 }
 
@@ -442,10 +477,12 @@ onDestroy(() => {
     position: static;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
+    gap: 0.75rem;
     overflow: auto;
     align-items: start;
     height: auto;
+    max-height: calc(96svh - 3rem);
+    padding: 0 0.5rem 1rem;
   }
 
   .itinerario-overlay__day {
@@ -456,11 +493,11 @@ onDestroy(() => {
     scroll-snap-align: unset;
   }
 
-  .itinerario-overlay__day img {
+  .itinerario-overlay__img {
     width: 100%;
     height: auto;
-    min-height: 0;
-    object-fit: unset;
+    transform: scale(1.05);
+    transform-origin: center top;
   }
 }
 </style>

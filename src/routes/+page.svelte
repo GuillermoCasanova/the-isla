@@ -202,6 +202,7 @@ function openItinerario(event) {
 }
 
 .itinerario-trigger {
+  position: relative;
   font-family: var(--font-isla-00260);
   font-size: clamp(0.85rem, 2.5vw, 1rem);
   letter-spacing: 0.12em;
@@ -214,10 +215,28 @@ function openItinerario(event) {
   transition: color 0.25s ease;
 }
 
+.itinerario-trigger::after {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.15em;
+  height: 2px;
+  background-color: rgba(55, 68, 85, 1);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.22s ease;
+}
+
 .itinerario-trigger:hover,
 .itinerario-trigger:focus-visible {
-  color: #fff;
+  color: rgba(55, 68, 85, 1);
   outline: none;
+}
+
+.itinerario-trigger:hover::after,
+.itinerario-trigger:focus-visible::after {
+  transform: scaleX(1);
 }
 
 .home__logo {
@@ -240,6 +259,15 @@ function openItinerario(event) {
 @media (prefers-reduced-motion: reduce) {
   .home__video {
     display: none;
+  }
+
+  .itinerario-trigger::after {
+    transition: none;
+  }
+
+  .itinerario-trigger:hover::after,
+  .itinerario-trigger:focus-visible::after {
+    transform: scaleX(1);
   }
 }
 </style>
