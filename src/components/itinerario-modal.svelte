@@ -245,7 +245,7 @@ onDestroy(() => {
   flex-direction: column;
   width: min(98vw, 82rem);
   max-height: 96svh;
-  background: #fff;
+  background: transparent;
   box-sizing: border-box;
   pointer-events: auto;
   overflow: hidden;
@@ -469,35 +469,62 @@ onDestroy(() => {
 }
 
 @media screen and (min-width: 900px) {
+  .itinerario-overlay {
+    padding: clamp(1rem, 3vh, 1.5rem) 0.75rem;
+  }
+
   .itinerario-overlay__panel {
     position: relative;
+    width: min(98vw, 92rem);
+    max-height: 96svh;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .itinerario-overlay__header {
+    padding: 0 0.25rem 0.75rem;
+  }
+
+  .itinerario-overlay__close:hover,
+  .itinerario-overlay__close:focus-visible {
+    color: #fff;
+    outline: none;
   }
 
   .itinerario-overlay__content {
     position: static;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-    overflow: auto;
-    align-items: start;
-    height: auto;
-    max-height: calc(96svh - 3rem);
-    padding: 0 0.5rem 1rem;
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+    overflow: hidden;
+    align-items: stretch;
+    height: calc(96svh - 3.25rem);
+    max-height: calc(96svh - 3.25rem);
+    padding: 0;
+    scroll-snap-type: none;
   }
 
   .itinerario-overlay__day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     min-width: 0;
     min-height: 0;
-    height: auto;
+    height: 100%;
+    background: transparent;
     scroll-snap-align: unset;
   }
 
   .itinerario-overlay__img {
-    width: 100%;
-    height: auto;
-    transform: scale(1.05);
-    transform-origin: center top;
+    display: block;
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center top;
+    transform: none;
   }
 }
 </style>
