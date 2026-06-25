@@ -52,11 +52,13 @@ export const trapFocus = function(container, elementToFocus = container) {
       }
     };
   
-    document.addEventListener('focusout', trapFocusHandlers.focusout);
-    document.addEventListener('focusin', trapFocusHandlers.focusin);
-  
+  document.addEventListener('focusout', trapFocusHandlers.focusout);
+  document.addEventListener('focusin', trapFocusHandlers.focusin);
+
+  if (elementToFocus && typeof elementToFocus.focus === "function") {
     elementToFocus.focus();
   }
+}
   
 
 export const  removeTrapFocus = function(elementToFocus = null) {

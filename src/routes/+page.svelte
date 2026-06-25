@@ -1,21 +1,31 @@
 <script>
 import { page } from "$app/stores";
+import ArtistasModal from "../components/artistas-modal.svelte";
 import ItinerarioModal from "../components/itinerario-modal.svelte";
 
 /** Local hero loop (from Clips/IMG_4755.MOV, transcoded to H.264 for browsers). */
 const backgroundVideoSrc = "/home-hero.mp4";
 
-const description = "La Isla Fashion Show — June 26–28, 2026.";
+const description =
+  "La Isla Fashion Show en La Parguera Plaza Hotel, del 26 al 28 de junio. Moda local e internacional, música en vivo, galería, arte y pop-ups. Cultura y creatividad caribeña en un solo lugar";
 const ogTitle = "La Isla Fashion Show";
 
+let artistasModal;
+let artistasOpen = false;
 let itinerarioModal;
 let itinerarioOpen = false;
 
 $: canonicalUrl = `${$page.url.origin}${$page.url.pathname}`;
 $: ogImageUrl = `${$page.url.origin}/og_image.png`;
 
-function openItinerario(event) {
-  itinerarioModal?.open(event.currentTarget);
+async function openArtistas(event) {
+  artistasOpen = true;
+  await artistasModal?.open(event.currentTarget);
+}
+
+async function openItinerario(event) {
+  itinerarioOpen = true;
+  await itinerarioModal?.open(event.currentTarget);
 }
 </script>
 
@@ -127,19 +137,33 @@ function openItinerario(event) {
         />
         </svg>
 
-        <button
-          type="button"
-          class="itinerario-trigger"
-          aria-haspopup="dialog"
-          aria-expanded={itinerarioOpen}
-          on:click={openItinerario}
-        >
-          Itinerario
-        </button>
+        <div class="home__brand-actions">
+          <button
+            type="button"
+            class="home-nav-trigger home-nav-trigger--label"
+            aria-haspopup="dialog"
+            aria-expanded={artistasOpen}
+            on:click={openArtistas}
+          >
+            Artistas
+          </button>
+
+          <button
+            type="button"
+            class="home-nav-trigger home-nav-trigger--label"
+            aria-haspopup="dialog"
+            aria-expanded={itinerarioOpen}
+            on:click={openItinerario}
+          >
+            Itinerario
+          </button>
+        </div>
       </div>
     </div>
   </section>
 </div>
+
+<ArtistasModal bind:this={artistasModal} bind:isOpen={artistasOpen} />
 
 <ItinerarioModal
   bind:this={itinerarioModal}
@@ -201,12 +225,19 @@ function openItinerario(event) {
   gap: clamp(1.75rem, 5vh, 2.75rem);
 }
 
-.itinerario-trigger {
+.home__brand-actions {
+  --nav-trigger-size: clamp(0.85rem, 2.5vw, 1rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.25rem, 4vw, 2rem);
+}
+
+.home-nav-trigger {
   position: relative;
   font-family: var(--font-isla-00260);
-  font-size: clamp(0.85rem, 2.5vw, 1rem);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: var(--nav-trigger-size);
+  line-height: 1;
   color: #4a6eb7;
   background: transparent;
   border: none;
@@ -215,7 +246,12 @@ function openItinerario(event) {
   transition: color 0.25s ease;
 }
 
-.itinerario-trigger::after {
+.home-nav-trigger--label {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.home-nav-trigger::after {
   content: "";
   position: absolute;
   left: 0.5rem;
@@ -228,14 +264,14 @@ function openItinerario(event) {
   transition: transform 0.22s ease;
 }
 
-.itinerario-trigger:hover,
-.itinerario-trigger:focus-visible {
+.home-nav-trigger:hover,
+.home-nav-trigger:focus-visible {
   color: rgba(55, 68, 85, 1);
   outline: none;
 }
 
-.itinerario-trigger:hover::after,
-.itinerario-trigger:focus-visible::after {
+.home-nav-trigger:hover::after,
+.home-nav-trigger:focus-visible::after {
   transform: scaleX(1);
 }
 
@@ -261,12 +297,12 @@ function openItinerario(event) {
     display: none;
   }
 
-  .itinerario-trigger::after {
+  .home-nav-trigger::after {
     transition: none;
   }
 
-  .itinerario-trigger:hover::after,
-  .itinerario-trigger:focus-visible::after {
+  .home-nav-trigger:hover::after,
+  .home-nav-trigger:focus-visible::after {
     transform: scaleX(1);
   }
 }
