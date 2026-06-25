@@ -442,7 +442,7 @@ onDestroy(() => {
     gap: 0;
     padding: 0;
     overflow-x: auto;
-    overflow-y: auto;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 0;
   }
@@ -451,7 +451,7 @@ onDestroy(() => {
     flex: 0 0 100%;
     width: 100%;
     min-width: 100%;
-    height: auto;
+    height: 100svh;
     min-height: 100svh;
     scroll-snap-align: start;
     margin: 0;
@@ -461,7 +461,7 @@ onDestroy(() => {
   .itinerario-overlay__img {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
     max-width: 100%;
     object-fit: contain;
     object-position: center top;
