@@ -7,25 +7,29 @@ const MOBILE_QUERY = "(max-width: 899px)";
 
 const artists = [
   {
-    src: "/artistas/tito-auger.png",
+    desktopSrc: "/artistas/tito-auger-desktop.png",
+    mobileSrc: "/artistas/tito-auger-mobile.png",
     alt: "Tito Auger — La Isla Fashion Show",
     name: "Tito Auger",
     instagram: "https://www.instagram.com/titoauger/",
   },
   {
-    src: "/artistas/dj-kamion.png",
+    desktopSrc: "/artistas/dj-kamion-desktop.png",
+    mobileSrc: "/artistas/dj-kamion-mobile.png",
     alt: "DJ Kamion — La Isla Fashion Show",
     name: "DJ Kamion",
     instagram: "https://www.instagram.com/kamila_sophiaaa/",
   },
   {
-    src: "/artistas/javylamonta.png",
+    desktopSrc: "/artistas/javylamonta-desktop.png",
+    mobileSrc: "/artistas/javylamonta-mobile.png",
     alt: "JAVYLAMONTA — La Isla Fashion Show",
     name: "JAVYLAMONTA",
     instagram: "https://www.instagram.com/javylamonta/",
   },
   {
-    src: "/artistas/habichuelas.png",
+    desktopSrc: "/artistas/habichuelas-desktop.png",
+    mobileSrc: "/artistas/habichuelas-mobile.png",
     alt: "Habichuelas — La Isla Fashion Show",
     name: "Habichuelas",
     instagram: "https://www.instagram.com/_habichuelas_/",
@@ -226,7 +230,7 @@ onDestroy(() => {
             >
               <img
                 class="artistas-overlay__img"
-                src={artist.src}
+                src={isMobile ? artist.mobileSrc : artist.desktopSrc}
                 alt={artist.alt}
                 width="1080"
                 height="1350"
@@ -560,9 +564,18 @@ onDestroy(() => {
     padding: 0 0.25rem 0.75rem;
   }
 
+  .artistas-overlay__title {
+    color: #fff;
+  }
+
+  .artistas-overlay__close {
+    color: #fff;
+    transition: color 0.25s ease;
+  }
+
   .artistas-overlay__close:hover,
   .artistas-overlay__close:focus-visible {
-    color: #fff;
+    color: #4a6eb7;
     outline: none;
   }
 

@@ -492,9 +492,18 @@ onDestroy(() => {
     padding: 0 0.25rem 0.75rem;
   }
 
+  .itinerario-overlay__title {
+    color: #fff;
+  }
+
+  .itinerario-overlay__close {
+    color: #fff;
+    transition: color 0.25s ease;
+  }
+
   .itinerario-overlay__close:hover,
   .itinerario-overlay__close:focus-visible {
-    color: #fff;
+    color: #4a6eb7;
     outline: none;
   }
 
