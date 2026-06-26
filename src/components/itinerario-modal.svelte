@@ -154,6 +154,8 @@ onDestroy(() => {
     />
 
     <div class="itinerario-overlay__panel">
+      <div class="itinerario-overlay__paper" aria-hidden="true" />
+
       <header class="itinerario-overlay__header">
         <h2 id="itinerario-modal-title" class="itinerario-overlay__title">
           Itinerario
@@ -328,11 +330,15 @@ onDestroy(() => {
   max-width: 100%;
 }
 
+.itinerario-overlay__paper {
+  display: none;
+}
+
 @media screen and (max-width: 899px) {
   .itinerario-overlay {
     display: block;
     padding: 0;
-    background: #fff;
+    background: #ebe9e4;
   }
 
   .itinerario-overlay__backdrop {
@@ -346,7 +352,20 @@ onDestroy(() => {
     height: 100%;
     max-height: none;
     overflow: hidden;
-    background: #fff;
+    background: transparent;
+  }
+
+  .itinerario-overlay__paper {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-color: #ebe9e4;
+    background-image: url("/artistas/paper-texture.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   .itinerario-overlay__header {
@@ -462,7 +481,7 @@ onDestroy(() => {
     min-height: 100svh;
     scroll-snap-align: start;
     margin: 0;
-    background: #fff;
+    background: transparent;
   }
 
   .itinerario-overlay__img {
