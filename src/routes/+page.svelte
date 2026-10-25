@@ -10,6 +10,9 @@ const description =
   "La Isla Fashion Show en La Parguera Plaza Hotel, del 26 al 28 de junio. Moda local e internacional, música en vivo, galería, arte y pop-ups. Cultura y creatividad caribeña en un solo lugar";
 const ogTitle = "La Isla Fashion Show";
 
+/** Set true when the December event restores Artistas / Itinerario */
+const SHOW_EVENT_NAV = false;
+
 let artistasModal;
 let artistasOpen = false;
 let itinerarioModal;
@@ -137,38 +140,46 @@ async function openItinerario(event) {
         />
         </svg>
 
-        <div class="home__brand-actions">
-          <button
-            type="button"
-            class="home-nav-trigger home-nav-trigger--label"
-            aria-haspopup="dialog"
-            aria-expanded={artistasOpen}
-            on:click={openArtistas}
-          >
-            Artistas
-          </button>
+        {#if !SHOW_EVENT_NAV}
+          <p class="home__coming-soon">Coming Soon</p>
+        {/if}
 
-          <button
-            type="button"
-            class="home-nav-trigger home-nav-trigger--label"
-            aria-haspopup="dialog"
-            aria-expanded={itinerarioOpen}
-            on:click={openItinerario}
-          >
-            Itinerario
-          </button>
-        </div>
+        {#if SHOW_EVENT_NAV}
+          <div class="home__brand-actions">
+            <button
+              type="button"
+              class="home-nav-trigger home-nav-trigger--label"
+              aria-haspopup="dialog"
+              aria-expanded={artistasOpen}
+              on:click={openArtistas}
+            >
+              Artistas
+            </button>
+
+            <button
+              type="button"
+              class="home-nav-trigger home-nav-trigger--label"
+              aria-haspopup="dialog"
+              aria-expanded={itinerarioOpen}
+              on:click={openItinerario}
+            >
+              Itinerario
+            </button>
+          </div>
+        {/if}
       </div>
     </div>
   </section>
 </div>
 
-<ArtistasModal bind:this={artistasModal} bind:isOpen={artistasOpen} />
+{#if SHOW_EVENT_NAV}
+  <ArtistasModal bind:this={artistasModal} bind:isOpen={artistasOpen} />
 
-<ItinerarioModal
-  bind:this={itinerarioModal}
-  bind:isOpen={itinerarioOpen}
-/>
+  <ItinerarioModal
+    bind:this={itinerarioModal}
+    bind:isOpen={itinerarioOpen}
+  />
+{/if}
 
 <style>
 .home {
@@ -284,8 +295,26 @@ async function openItinerario(event) {
   max-height: min(50vh, 320px);
   display: block;
   flex-shrink: 0;
+  color: var(--isla-brand-ink);
   filter: drop-shadow(0 2px 24px rgba(0, 0, 0, 0.3));
 }
+
+.home__logo path {
+  fill: currentColor;
+}
+
+.home__coming-soon {
+  font-family: var(--font-isla-00260);
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--isla-brand-ink);
+  margin: 0;
+  margin-top: clamp(-0.25rem, -1vh, -0.75rem);
+  text-align: center;
+}
+
 @media screen and (min-width: 768px) {
   .home__logo {
     max-width: 16rem;
