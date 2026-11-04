@@ -7,7 +7,26 @@ const config = {
 	kit: {
 		adapter: adapter({
 			runtime: 'nodejs22.x'
-		})
+		}),
+		typescript: {
+			config: (config) => {
+				const {
+					importsNotUsedAsValues,
+					preserveValueImports,
+					ignoreDeprecations,
+					...compilerOptions
+				} = config.compilerOptions;
+
+				return {
+					...config,
+					compilerOptions: {
+						...compilerOptions,
+						verbatimModuleSyntax: true,
+						moduleResolution: 'bundler'
+					}
+				};
+			}
+		}
 	}
 };
 

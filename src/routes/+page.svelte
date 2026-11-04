@@ -3,6 +3,10 @@ import { page } from "$app/stores";
 import ArtistasModal from "../components/artistas-modal.svelte";
 import ItinerarioModal from "../components/itinerario-modal.svelte";
 
+/** Switch to `"video"` to restore the looping hero clip. */
+const HERO_BACKGROUND_TYPE = "image";
+
+const backgroundImageSrc = "/home-hero.png";
 /** Local hero loop (from Clips/IMG_4755.MOV, transcoded to H.264 for browsers). */
 const backgroundVideoSrc = "/home-hero.mp4";
 
@@ -50,15 +54,26 @@ async function openItinerario(event) {
 
 <div class="home">
   <section class="home__hero" aria-label="Introducción">
-    <video
-      class="home__video"
-      src={backgroundVideoSrc}
-      autoplay
-      muted
-      loop
-      playsinline
-      aria-hidden="true"
-    />
+    {#if HERO_BACKGROUND_TYPE === "video"}
+      <video
+        class="home__background home__background--video"
+        src={backgroundVideoSrc}
+        autoplay
+        muted
+        loop
+        playsinline
+        aria-hidden="true"
+      ></video>
+    {:else}
+      <img
+        class="home__background home__background--image"
+        src={backgroundImageSrc}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        fetchpriority="high"
+      />
+    {/if}
     <div class="home__content">
       <div class="home__brand">
         <svg
@@ -141,7 +156,7 @@ async function openItinerario(event) {
         </svg>
 
         {#if !SHOW_EVENT_NAV}
-          <p class="home__coming-soon">Coming Soon</p>
+          <p class="home__coming-soon">4-6 Dec</p>
         {/if}
 
         {#if SHOW_EVENT_NAV}
@@ -195,18 +210,26 @@ async function openItinerario(event) {
   overflow: hidden;
 }
 
-.home__video {
+.home__background {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: center;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.4;
   background: transparent;
+}
+
+.home__background--video {
+  object-position: center top;
+  opacity: 0.4;
   filter: grayscale(0.5) brightness(0.95) contrast(1.05);
+}
+
+.home__background--image {
+  opacity: 1;
 }
 
 .home__hero::after {
@@ -305,7 +328,7 @@ async function openItinerario(event) {
 
 .home__coming-soon {
   font-family: var(--font-isla-00260);
-  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  font-size: clamp(1.15rem, 4vw, 1.65rem);
   line-height: 1;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -322,7 +345,7 @@ async function openItinerario(event) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home__video {
+  .home__background--video {
     display: none;
   }
 
