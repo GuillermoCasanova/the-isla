@@ -3,7 +3,6 @@
 
 import Nav from "../components/header.svelte";
 import SvgGraphics from "../components/svg-graphics.svelte";
-import Footer from "../components/footer.svelte";
 import { afterNavigate, beforeNavigate } from "$app/navigation";
 import { fade } from "svelte/transition";
 import { cubicIn } from "svelte/easing";

@@ -1,26 +1,6 @@
 @import "normalize.css";
 
 @font-face {
-  font-family: "humanist_521_regular";
-  src: url("$lib/assets/Humanst521BTW05-Roman.woff2") format("woff2"),
-    url("$lib/assets/Humanst521BTW05-Roman.woff") format("woff");
-
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "humanist_521_light";
-  src: url("$lib/assets/Humanst521LtBTW05-Light.woff2") format("woff2"),
-    url("$lib/assets/Humanst521LtBTW05-Light.woff") format("woff");
-
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
   font-family: "isla_00260";
   src: url("$lib/assets/00260.ttf") format("truetype");
   font-weight: normal;
@@ -193,9 +173,9 @@ img {
 \*------------------------------------*/
 
 :root {
-  --primary-font-family: "humanist_521_light", "sans-serif";
-  --secondary-font-family: "humanist_521_regular", "sans-serif";
-  --tertiary-font-family: "humanist_521_regular", "arial", "sans-serif";
+  --primary-font-family: ui-sans-serif, system-ui, sans-serif;
+  --secondary-font-family: ui-sans-serif, system-ui, sans-serif;
+  --tertiary-font-family: ui-sans-serif, system-ui, sans-serif;
   --font-isla-00260: "isla_00260", ui-sans-serif, system-ui, sans-serif;
   --letter-spacing-1: 1px;
   --letter-spacing-2: 1px;
