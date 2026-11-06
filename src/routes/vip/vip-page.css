@@ -295,8 +295,8 @@
   min-height: 0 !important;
   box-sizing: border-box !important;
   text-transform: uppercase !important;
-  background-color: white !important;
-  color: rgba(74, 110, 183, 1) !important;
+  background-color: #dbddd7 !important;
+  color: rgb(24, 25, 28) !important;
   font-family: var(--font-isla-00260) !important;
   letter-spacing: 0.1em !important;
 }
