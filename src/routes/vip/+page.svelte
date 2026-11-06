@@ -167,7 +167,7 @@ const description = "La Isla Fashion Show — invitación VIP.";
 const ogTitle = "VIP — La Isla Fashion Show";
 
 $: canonicalUrl = `${$page.url.origin}${$page.url.pathname}`;
-$: ogImageUrl = `${$page.url.origin}/og_image_vip.png`;
+$: ogImageUrl = `${$page.url.origin}/open-graph-image.png`;
 </script>
 
 <svelte:head>

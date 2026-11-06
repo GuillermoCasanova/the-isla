@@ -26,7 +26,7 @@ let itinerarioModal;
 let itinerarioOpen = false;
 
 $: canonicalUrl = `${$page.url.origin}${$page.url.pathname}`;
-$: ogImageUrl = `${$page.url.origin}/og_image.png`;
+$: ogImageUrl = `${$page.url.origin}/open-graph-image.png`;
 
 async function openArtistas(event) {
   artistasOpen = true;
