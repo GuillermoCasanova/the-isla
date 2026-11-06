@@ -4,10 +4,10 @@ import { onMount, tick } from "svelte";
 import { page } from "$app/stores";
 import { gsap } from "gsap";
 import { waitForLoadingOverlayHidden } from "$lib/app-loading.js";
-import cardImg from "$lib/assets/vip-card.png";
-import envelopeBackImg from "$lib/assets/WEB-ENVELOPE-BACK_fw26.png";
-import envelopeFrontImg from "$lib/assets/WEB-ENVELOPE-FRONT_fw26.png";
-import bgMobileVipInvite from "$lib/assets/bg-mobile-vip-invite.png";
+import cardImg from "$lib/assets/vip-card.webp";
+import envelopeBackImg from "$lib/assets/WEB-ENVELOPE-BACK_fw26.webp";
+import envelopeFrontImg from "$lib/assets/WEB-ENVELOPE-FRONT_fw26.webp";
+import bgMobileVipInvite from "$lib/assets/bg-mobile-vip-invite.webp";
 
 const backgroundVideoSrc =
   "https://public-assets.content-platform.envatousercontent.com/4c480208-1b25-4c61-b568-61746f5b908f/7e7c95f4-ba97-4589-aed4-e37f9f47392d/4c480208-1b25-4c61-b568-61746f5b908f/preview_540p_crf22_higher_quality.mp4";
@@ -21,6 +21,17 @@ let cardEl;
 let envelopeBackEl;
 let envelopeFrontEl;
 let formEl;
+
+/** Keeps the scrollbar from appearing while envelopes animate (transform extends overflow). */
+function lockIntroScroll() {
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+}
+
+function unlockIntroScroll() {
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+}
 
 onMount(() => {
   let cancelled = false;
@@ -61,6 +72,7 @@ onMount(() => {
 
   return () => {
     cancelled = true;
+    unlockIntroScroll();
     revertGsap?.();
   };
 
@@ -126,7 +138,14 @@ onMount(() => {
     return {
       playIntro() {
         playCtx = gsap.context(() => {
-          const tl = gsap.timeline({ defaults: { ease: "power2.Out" } });
+          lockIntroScroll();
+
+          const tl = gsap.timeline({
+            defaults: { ease: "power2.Out" },
+            onComplete: () => {
+              unlockIntroScroll();
+            },
+          });
 
           tl.to([cardEl, ...envelopeLayers], {
             scale: 1,
@@ -148,6 +167,18 @@ onMount(() => {
             "-=0.7", // start opacity fade at the same time as yPercent or adjust timing if needed
           );
 
+          // yPercent moves absolutely positioned envelopes in document flow, so the layout
+          // can keep extra scroll height after fade. Remove from layout once the move ends.
+          tl.set(
+            envelopeLayers,
+            {
+              display: "none",
+              yPercent: 0,
+              clearProps: "transform",
+            },
+            INTRO_DURATION + ENVELOPE_EXIT_DURATION,
+          );
+
           tl.to(
             formEl,
             {
@@ -161,6 +192,7 @@ onMount(() => {
         }, root);
       },
       revert: () => {
+        unlockIntroScroll();
         playCtx?.revert();
         settleCtx.revert();
       },
@@ -261,8 +293,12 @@ $: ogImageUrl = `${$page.url.origin}/og_image_vip.png`;
 </div>
 
 <style>
+  #vip-fw26-page.vip {
+    background: #1f1d1b;
+  }
+
   .vip-fw26__hero-inner {
-    background-color: rgb(27 50 104);
+    background-color: #1f1d1b;
     background-image: var(--vip-fw26-hero-bg);
     background-repeat: no-repeat;
     background-position: center top;
@@ -305,5 +341,16 @@ $: ogImageUrl = `${$page.url.origin}/og_image_vip.png`;
   #vip-fw26-page .vip__form form.klaviyo-form p,
   #vip-fw26-page .vip__form form.klaviyo-form .ql-editor {
     color: #dfe3e1 !important;
+  }
+
+  /* Klaviyo buttons — label/text in dark gray (matches page bg token #1f1d1b) */
+  #vip-fw26-page .vip__form form.klaviyo-form button[type="submit"],
+  #vip-fw26-page .vip__form form.klaviyo-form button.klaviyo-form-button[type="submit"],
+  #vip-fw26-page .vip__form form.klaviyo-form [type="submit"] {
+    color: #1f1d1b !important;
+  }
+
+  #vip-fw26-page .vip__form form.klaviyo-form button.klaviyo-form-button[type="button"] {
+    color: #1f1d1b !important;
   }
 </style>
