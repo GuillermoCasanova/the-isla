@@ -159,12 +159,18 @@
   z-index: 1;
   min-height: calc(5 * var(--level5));
   box-sizing: border-box;
+  /* Hide until GSAP reveals after intro (avoids Klaviyo flash before JS runs). */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Klaviyo embed — match La Isla typography & VIP page palette */
 .vip__form .klaviyo-form-RXCRDS,
+.vip__form .klaviyo-form-RNSA8d,
 .vip__form form.klaviyo-form,
-.vip__form form[data-testid="klaviyo-form-RXCRDS"] {
+.vip__form form[data-testid="klaviyo-form-RXCRDS"],
+.vip__form form[data-testid="klaviyo-form-RNSA8d"] {
   display: flex !important;
   flex-direction: column !important;
   flex-wrap: nowrap !important;
@@ -335,8 +341,8 @@
   }
 
   .vip__form {
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 }

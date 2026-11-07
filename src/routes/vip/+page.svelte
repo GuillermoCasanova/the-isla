@@ -15,11 +15,67 @@ const INTRO_DURATION = 0.85;
 const ENVELOPE_EXIT_DURATION = 0.95;
 const FORM_FADE_DURATION = 0.5;
 
+/** Max wait if app-shell-ready never fires (avoids hanging forever with no animation). */
+const SHELL_READY_FALLBACK_MS = 3500;
+
+/** Long enough for slow devices / hydration before giving up on refs. */
+const REF_BIND_MAX_FRAMES = 180;
+
 let rootEl;
 let cardEl;
 let envelopeBackEl;
 let envelopeFrontEl;
 let formEl;
+
+/** Keeps the scrollbar from appearing while envelopes animate (transform extends overflow). */
+function lockIntroScroll() {
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+}
+
+function unlockIntroScroll() {
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+}
+
+/**
+ * @param {string} src
+ * @returns {Promise<void>}
+ */
+function preloadImage(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = src;
+  });
+}
+
+/** @param {number} ms */
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+/** Klaviyo onsite.js scans on load; if the embed div is hidden or hydrated late, re-run the page scan (SPA pattern). */
+function nudgeKlaviyoOnsite() {
+  if (typeof window === "undefined") return;
+  try {
+    window.dispatchEvent(
+      new CustomEvent("onsite-event-publish", {
+        detail: {
+          type: "PAGE_CHANGE",
+          payload: {
+            currentPageUrl: `${window.location.origin}/__klaviyo_vip_${Date.now()}`,
+          },
+        },
+      }),
+    );
+  } catch {
+    /* ignore */
+  }
+}
 
 onMount(() => {
   let cancelled = false;
@@ -32,7 +88,7 @@ onMount(() => {
 
     let attempts = 0;
     while (
-      attempts < 40 &&
+      attempts < REF_BIND_MAX_FRAMES &&
       (!rootEl || !cardEl || !envelopeBackEl || !envelopeFrontEl || !formEl)
     ) {
       await new Promise((r) => requestAnimationFrame(r));
@@ -42,11 +98,28 @@ onMount(() => {
 
     if (cancelled) return;
 
+    if (!rootEl || !cardEl || !envelopeBackEl || !envelopeFrontEl || !formEl) {
+      return;
+    }
+
+    // Card + envelopes must have dimensions before transforms look correct.
+    await Promise.all([
+      preloadImage(cardImg),
+      preloadImage(envelopeBackImg),
+      preloadImage(envelopeFrontImg),
+    ]);
+    if (cancelled) return;
+
     const ctrl = prepareVipGsap();
     if (!ctrl) return;
 
+    await tick();
+
     // Same moment as app-shell-ready / finish(): overlay has finished fading.
-    await waitForLoadingOverlayHidden();
+    await Promise.race([
+      waitForLoadingOverlayHidden(),
+      delay(SHELL_READY_FALLBACK_MS),
+    ]);
     if (cancelled) {
       ctrl.revert();
       return;
@@ -60,6 +133,7 @@ onMount(() => {
 
   return () => {
     cancelled = true;
+    unlockIntroScroll();
     revertGsap?.();
   };
 
@@ -83,12 +157,13 @@ onMount(() => {
         gsap.set(envelopeLayers, {
           opacity: 0,
           scale: 1,
+          x: 0,
           xPercent: -50,
           yPercent: 0,
           pointerEvents: "none",
         });
         gsap.set(formEl, {
-          visibility: "visible",
+          autoAlpha: 1,
           pointerEvents: "auto",
         });
       }, root);
@@ -110,7 +185,10 @@ onMount(() => {
         transformOrigin: "50% 50%",
       });
 
+      // x: 0 discards GSAP's pixel read of the CSS translateX(-50%), which it
+      // sometimes fails to detect as a percent at fractional widths and then doubles.
       gsap.set(envelopeLayers, {
+        x: 0,
         xPercent: -50,
         yPercent: 0,
       });
@@ -121,7 +199,16 @@ onMount(() => {
     return {
       playIntro() {
         playCtx = gsap.context(() => {
-          const tl = gsap.timeline({ defaults: { ease: "power2.Out" } });
+          lockIntroScroll();
+
+          const tl = gsap.timeline({
+            defaults: { ease: "power2.out" },
+            onComplete: () => {
+              unlockIntroScroll();
+              nudgeKlaviyoOnsite();
+              window.setTimeout(nudgeKlaviyoOnsite, 200);
+            },
+          });
 
           tl.to([cardEl, ...envelopeLayers], {
             scale: 1,
@@ -140,7 +227,17 @@ onMount(() => {
               duration: ENVELOPE_EXIT_DURATION * 0.65,
               ease: "power2.inOut",
             },
-            "-=0.7", // start opacity fade at the same time as yPercent or adjust timing if needed
+            "-=0.7",
+          );
+
+          tl.set(
+            envelopeLayers,
+            {
+              display: "none",
+              yPercent: 0,
+              clearProps: "transform",
+            },
+            INTRO_DURATION + ENVELOPE_EXIT_DURATION,
           );
 
           tl.to(
@@ -156,6 +253,7 @@ onMount(() => {
         }, root);
       },
       revert: () => {
+        unlockIntroScroll();
         playCtx?.revert();
         settleCtx.revert();
       },

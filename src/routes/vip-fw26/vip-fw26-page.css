@@ -1,0 +1,39 @@
+/* Klaviyo embed (injected at runtime) — lives in global CSS so Svelte does not flag unused selectors. */
+
+#vip-fw26-page .vip__form .klaviyo-form-RNSA8d,
+#vip-fw26-page .vip__form form.klaviyo-form,
+#vip-fw26-page .vip__form form[data-testid="klaviyo-form-RNSA8d"] {
+  color: #dfe3e1 !important;
+}
+
+#vip-fw26-page .vip__form form.klaviyo-form h1,
+#vip-fw26-page .vip__form form.klaviyo-form h2,
+#vip-fw26-page .vip__form form.klaviyo-form h3,
+#vip-fw26-page .vip__form form.klaviyo-form h4,
+#vip-fw26-page .vip__form form.klaviyo-form [id^="rich-text"] h3 {
+  color: #dfe3e1 !important;
+}
+
+#vip-fw26-page .vip__form form.klaviyo-form [id^="rich-text"] strong {
+  color: #dfe3e1 !important;
+}
+
+#vip-fw26-page .vip__form form.klaviyo-form label,
+#vip-fw26-page .vip__form form.klaviyo-form .klaviyo-field-label {
+  color: #dfe3e1 !important;
+}
+
+#vip-fw26-page .vip__form form.klaviyo-form p,
+#vip-fw26-page .vip__form form.klaviyo-form .ql-editor {
+  color: #dfe3e1 !important;
+}
+
+#vip-fw26-page .vip__form form.klaviyo-form button[type="submit"],
+#vip-fw26-page .vip__form form.klaviyo-form button.klaviyo-form-button[type="submit"],
+#vip-fw26-page .vip__form form.klaviyo-form [type="submit"] {
+  color: #1f1d1b !important;
+}
+
+#vip-fw26-page .vip__form form.klaviyo-form button.klaviyo-form-button[type="button"] {
+  color: #1f1d1b !important;
+}

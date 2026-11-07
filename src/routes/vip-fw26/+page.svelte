@@ -1,5 +1,6 @@
 <script>
 import "../vip/vip-page.css";
+import "./vip-fw26-page.css";
 import { onMount, tick } from "svelte";
 import { page } from "$app/stores";
 import { gsap } from "gsap";
@@ -8,6 +9,7 @@ import cardImg from "$lib/assets/vip-card.webp";
 import envelopeBackImg from "$lib/assets/WEB-ENVELOPE-BACK_fw26.webp";
 import envelopeFrontImg from "$lib/assets/WEB-ENVELOPE-FRONT_fw26.webp";
 import bgMobileVipInvite from "$lib/assets/bg-mobile-vip-invite.webp";
+import panorawmaLogo from "$lib/assets/panorawma-logo.png";
 
 const backgroundVideoSrc =
   "https://public-assets.content-platform.envatousercontent.com/4c480208-1b25-4c61-b568-61746f5b908f/7e7c95f4-ba97-4589-aed4-e37f9f47392d/4c480208-1b25-4c61-b568-61746f5b908f/preview_540p_crf22_higher_quality.mp4";
@@ -15,12 +17,23 @@ const backgroundVideoSrc =
 const INTRO_DURATION = 0.85;
 const ENVELOPE_EXIT_DURATION = 0.95;
 const FORM_FADE_DURATION = 0.5;
+const LOGO_FADE_DURATION = 0.65;
+
+/** Max wait if app-shell-ready never fires (avoids hanging forever with no animation). */
+const SHELL_READY_FALLBACK_MS = 3500;
+
+/** Long enough for slow devices / hydration before giving up on refs. */
+const REF_BIND_MAX_FRAMES = 180;
+
+/** If GSAP never reveals the form (error / stuck), un-hide it so Klaviyo is not trapped behind CSS. */
+const FORM_REVEAL_FALLBACK_MS = 10000;
 
 let rootEl;
 let cardEl;
 let envelopeBackEl;
 let envelopeFrontEl;
 let formEl;
+let producedEl;
 
 /** Keeps the scrollbar from appearing while envelopes animate (transform extends overflow). */
 function lockIntroScroll() {
@@ -33,10 +46,59 @@ function unlockIntroScroll() {
   document.body.style.overflow = "";
 }
 
+/**
+ * @param {string} src
+ * @returns {Promise<void>}
+ */
+function preloadImage(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = src;
+  });
+}
+
+/** @param {number} ms */
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+/** Klaviyo onsite.js may run before the form container is visible; re-scan after intro (SPA pattern). */
+function nudgeKlaviyoOnsite() {
+  if (typeof window === "undefined") return;
+  try {
+    window.dispatchEvent(
+      new CustomEvent("onsite-event-publish", {
+        detail: {
+          type: "PAGE_CHANGE",
+          payload: {
+            currentPageUrl: `${window.location.origin}/__klaviyo_vip_fw26_${Date.now()}`,
+          },
+        },
+      }),
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
 onMount(() => {
   let cancelled = false;
   /** @type {(() => void) | undefined} */
   let revertGsap;
+  /** @type {number | undefined} */
+  let revealFallbackTimer;
+
+  function formStillHidden() {
+    if (typeof document === "undefined" || !formEl) return true;
+    const s = window.getComputedStyle(formEl);
+    return (
+      s.visibility === "hidden" || parseFloat(s.opacity) < 0.01
+    );
+  }
 
   async function boot() {
     await tick();
@@ -44,8 +106,13 @@ onMount(() => {
 
     let attempts = 0;
     while (
-      attempts < 40 &&
-      (!rootEl || !cardEl || !envelopeBackEl || !envelopeFrontEl || !formEl)
+      attempts < REF_BIND_MAX_FRAMES &&
+      (!rootEl ||
+        !cardEl ||
+        !envelopeBackEl ||
+        !envelopeFrontEl ||
+        !formEl ||
+        !producedEl)
     ) {
       await new Promise((r) => requestAnimationFrame(r));
       attempts += 1;
@@ -54,11 +121,34 @@ onMount(() => {
 
     if (cancelled) return;
 
+    if (
+      !rootEl ||
+      !cardEl ||
+      !envelopeBackEl ||
+      !envelopeFrontEl ||
+      !formEl ||
+      !producedEl
+    ) {
+      return;
+    }
+
+    await Promise.all([
+      preloadImage(cardImg),
+      preloadImage(envelopeBackImg),
+      preloadImage(envelopeFrontImg),
+      preloadImage(panorawmaLogo),
+    ]);
+    if (cancelled) return;
+
     const ctrl = prepareVipGsap();
     if (!ctrl) return;
 
-    // Same moment as app-shell-ready / finish(): overlay has finished fading.
-    await waitForLoadingOverlayHidden();
+    await tick();
+
+    await Promise.race([
+      waitForLoadingOverlayHidden(),
+      delay(SHELL_READY_FALLBACK_MS),
+    ]);
     if (cancelled) {
       ctrl.revert();
       return;
@@ -66,12 +156,22 @@ onMount(() => {
 
     ctrl.playIntro();
     revertGsap = ctrl.revert;
+
+    revealFallbackTimer = window.setTimeout(() => {
+      if (cancelled || !formEl) return;
+      if (!formStillHidden()) return;
+      gsap.set(formEl, { autoAlpha: 1, pointerEvents: "auto" });
+      if (producedEl) gsap.set(producedEl, { autoAlpha: 1 });
+      nudgeKlaviyoOnsite();
+      window.setTimeout(nudgeKlaviyoOnsite, 300);
+    }, FORM_REVEAL_FALLBACK_MS);
   }
 
   void boot();
 
   return () => {
     cancelled = true;
+    if (revealFallbackTimer) window.clearTimeout(revealFallbackTimer);
     unlockIntroScroll();
     revertGsap?.();
   };
@@ -83,7 +183,14 @@ onMount(() => {
   function prepareVipGsap() {
     const root = rootEl;
     const envelopeLayers = [envelopeBackEl, envelopeFrontEl];
-    if (!root || !cardEl || !envelopeBackEl || !envelopeFrontEl || !formEl)
+    if (
+      !root ||
+      !cardEl ||
+      !envelopeBackEl ||
+      !envelopeFrontEl ||
+      !formEl ||
+      !producedEl
+    )
       return null;
 
     const reducedMotion = window.matchMedia(
@@ -102,9 +209,10 @@ onMount(() => {
           pointerEvents: "none",
         });
         gsap.set(formEl, {
-          visibility: "visible",
+          autoAlpha: 1,
           pointerEvents: "auto",
         });
+        gsap.set(producedEl, { autoAlpha: 1 });
       }, root);
       return {
         playIntro() {},
@@ -117,6 +225,7 @@ onMount(() => {
         autoAlpha: 0,
         pointerEvents: "none",
       });
+      gsap.set(producedEl, { autoAlpha: 0 });
 
       gsap.set([cardEl, ...envelopeLayers], {
         opacity: 1,
@@ -141,9 +250,11 @@ onMount(() => {
           lockIntroScroll();
 
           const tl = gsap.timeline({
-            defaults: { ease: "power2.Out" },
+            defaults: { ease: "power2.out" },
             onComplete: () => {
               unlockIntroScroll();
+              nudgeKlaviyoOnsite();
+              window.setTimeout(nudgeKlaviyoOnsite, 200);
             },
           });
 
@@ -180,6 +291,16 @@ onMount(() => {
           );
 
           tl.to(
+            producedEl,
+            {
+              autoAlpha: 1,
+              duration: LOGO_FADE_DURATION,
+              ease: "power2.out",
+            },
+            INTRO_DURATION + ENVELOPE_EXIT_DURATION,
+          );
+
+          tl.to(
             formEl,
             {
               autoAlpha: 1,
@@ -204,7 +325,7 @@ const description = "La Isla Fashion Show — FW-26.";
 const ogTitle = "FW-26 — La Isla Fashion Show";
 
 $: canonicalUrl = `${$page.url.origin}${$page.url.pathname}`;
-$: ogImageUrl = `${$page.url.origin}/open-graph-image.png`;
+$: ogImageUrl = `${$page.url.origin}/og_image_vip_fw26.jpg`;
 </script>
 
 <svelte:head>
@@ -282,8 +403,21 @@ $: ogImageUrl = `${$page.url.origin}/open-graph-image.png`;
               </div>
             </div>
 
+            <div class="vip-fw26__produced" bind:this={producedEl}>
+              <p class="vip-fw26__produced-label">Produced by</p>
+              <figure class="vip-fw26__panorawma" aria-label="Panorawma">
+                <img
+                  src={panorawmaLogo}
+                  alt="Panorawma"
+                  width="2675"
+                  height="283"
+                  decoding="async"
+                />
+              </figure>
+            </div>
+
             <div class="vip__form" bind:this={formEl}>
-              <div class="klaviyo-form-RXCRDS" />
+              <div class="klaviyo-form-RNSA8d" />
             </div>
           </div>
         </div>
@@ -315,42 +449,38 @@ $: ogImageUrl = `${$page.url.origin}/open-graph-image.png`;
     color: #dfe3e1 !important;
   }
 
-  #vip-fw26-page .vip__form .klaviyo-form-RXCRDS,
-  #vip-fw26-page .vip__form form.klaviyo-form,
-  #vip-fw26-page .vip__form form[data-testid="klaviyo-form-RXCRDS"] {
-    color: #dfe3e1 !important;
+  .vip-fw26__produced {
+    width: 100%;
+    margin-top: clamp(var(--level5), 4.5vh, var(--level7));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
   }
 
-  #vip-fw26-page .vip__form form.klaviyo-form h1,
-  #vip-fw26-page .vip__form form.klaviyo-form h2,
-  #vip-fw26-page .vip__form form.klaviyo-form h3,
-  #vip-fw26-page .vip__form form.klaviyo-form h4,
-  #vip-fw26-page .vip__form form.klaviyo-form [id^="rich-text"] h3 {
-    color: #dfe3e1 !important;
+  .vip-fw26__produced-label {
+    margin: 0 0 var(--level2);
+    text-align: center;
+    font-family: var(--font-isla-00260);
+    font-size: clamp(0.6rem, 1.8vw, 0.72rem);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #dfe3e1;
+    line-height: 1.2;
   }
 
-  #vip-fw26-page .vip__form form.klaviyo-form [id^="rich-text"] strong {
-    color: #dfe3e1 !important;
+  .vip-fw26__panorawma {
+    width: clamp(6.5rem, 20vw, 10.5rem);
+    max-width: min(34%, 168px);
+    margin: 0;
+    padding: 0;
+    line-height: 0;
   }
 
-  #vip-fw26-page .vip__form form.klaviyo-form label,
-  #vip-fw26-page .vip__form form.klaviyo-form .klaviyo-field-label {
-    color: #dfe3e1 !important;
-  }
-
-  #vip-fw26-page .vip__form form.klaviyo-form p,
-  #vip-fw26-page .vip__form form.klaviyo-form .ql-editor {
-    color: #dfe3e1 !important;
-  }
-
-  /* Klaviyo buttons — label/text in dark gray (matches page bg token #1f1d1b) */
-  #vip-fw26-page .vip__form form.klaviyo-form button[type="submit"],
-  #vip-fw26-page .vip__form form.klaviyo-form button.klaviyo-form-button[type="submit"],
-  #vip-fw26-page .vip__form form.klaviyo-form [type="submit"] {
-    color: #1f1d1b !important;
-  }
-
-  #vip-fw26-page .vip__form form.klaviyo-form button.klaviyo-form-button[type="button"] {
-    color: #1f1d1b !important;
+  .vip-fw26__panorawma img {
+    display: block;
+    width: 100%;
+    height: auto;
   }
 </style>

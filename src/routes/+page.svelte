@@ -3,13 +3,15 @@ import { page } from "$app/stores";
 import ArtistasModal from "../components/artistas-modal.svelte";
 import ItinerarioModal from "../components/itinerario-modal.svelte";
 
-import homepageLogo from "$lib/assets/homepage-logo.png";
+import homepageLogo from "$lib/assets/homepage-logo.webp";
 import datesFw26 from "$lib/assets/dates-fw26.webp";
 
 /** Switch to `"video"` to restore the looping hero clip. */
 const HERO_BACKGROUND_TYPE = "image";
 
-const backgroundImageSrc = "/home-hero.png";
+const heroBackgroundWebp = "/home-hero.webp";
+const heroBackgroundWebpMobile = "/home-hero-mobile.webp";
+const heroBackgroundFallback = "/home-hero.webp";
 /** Local hero loop (from Clips/IMG_4755.MOV, transcoded to H.264 for browsers). */
 const backgroundVideoSrc = "/home-hero.mp4";
 
@@ -68,14 +70,23 @@ async function openItinerario(event) {
         aria-hidden="true"
       ></video>
     {:else}
-      <img
-        class="home__background home__background--image"
-        src={backgroundImageSrc}
-        alt=""
-        aria-hidden="true"
-        decoding="async"
-        fetchpriority="high"
-      />
+      <picture class="home__background-picture" aria-hidden="true">
+        <source
+          media="(max-width: 767px)"
+          srcset={heroBackgroundWebpMobile}
+          type="image/webp"
+        />
+        <source srcset={heroBackgroundWebp} type="image/webp" />
+        <img
+          class="home__background home__background--image"
+          src={heroBackgroundFallback}
+          alt=""
+          width="819"
+          height="656"
+          decoding="async"
+          fetchpriority="low"
+        />
+      </picture>
     {/if}
     <div class="home__content">
       <div class="home__brand">
@@ -154,6 +165,18 @@ async function openItinerario(event) {
   overflow: hidden;
 }
 
+.home__background-picture {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  pointer-events: none;
+  background-color: #ebe6dc;
+}
+
 .home__background {
   position: absolute;
   inset: 0;
@@ -161,7 +184,6 @@ async function openItinerario(event) {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  z-index: 0;
   pointer-events: none;
   background: transparent;
 }
