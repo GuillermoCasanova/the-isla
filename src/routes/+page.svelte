@@ -16,8 +16,8 @@ const heroBackgroundFallback = "/home-hero.webp";
 const backgroundVideoSrc = "/home-hero.mp4";
 
 const description =
-  "La Isla Fashion Show en La Parguera Plaza Hotel, del 26 al 28 de junio. Moda local e internacional, música en vivo, galería, arte y pop-ups. Cultura y creatividad caribeña en un solo lugar";
-const ogTitle = "La Isla Fashion Show";
+  "La Isla Fashion Show FW26 en La Parguera Plaza Hotel, del 4 al 6 de diciembre. Moda local e internacional, música en vivo, galería, arte y pop-ups. Cultura y creatividad caribeña en un solo lugar";
+const ogTitle = "La Isla Fashion Show FW26";
 
 /** Set true when the December event restores Artistas / Itinerario */
 const SHOW_EVENT_NAV = false;
