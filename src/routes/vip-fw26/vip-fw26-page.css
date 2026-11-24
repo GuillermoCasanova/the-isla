@@ -57,16 +57,67 @@
   margin-bottom: 0.35rem !important;
 }
 
-/* Klaviyo: input (sr-only) then label (SVG circles + text). One square per option via label::before. */
-#vip-fw26-page .vip__form .klaviyo-radiobuttons [role="radiogroup"] {
+/* Center the plus-one field row (Klaviyo row often uses flex-start + horizontal padding). */
+#vip-fw26-page
+  .vip__form
+  [data-testid="form-row"]:has(.klaviyo-radiobuttons) {
   display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
+  justify-content: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+#vip-fw26-page .vip__form .klaviyo-radiobuttons,
+#vip-fw26-page .vip__form .klaviyo-radiobuttons fieldset {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  min-inline-size: 0 !important;
+  display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 1.25rem 2.75rem !important;
+}
+
+/* Klaviyo: input (sr-only) then label. Two columns span form width; options push apart. */
+#vip-fw26-page .vip__form .klaviyo-radiobuttons [role="radiogroup"] {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  justify-content: center !important;
+  justify-items: stretch !important;
+  align-items: center !important;
+  column-gap: clamp(3.25rem, 14vw, 5.5rem) !important;
+  row-gap: 0 !important;
   width: 100% !important;
+  max-width: 100% !important;
   margin-top: 0.5rem !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+
+#vip-fw26-page
+  .vip__form
+  .klaviyo-radiobuttons
+  [role="radiogroup"]
+  > label:first-of-type {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  padding-right: 0.25rem !important;
+}
+
+#vip-fw26-page
+  .vip__form
+  .klaviyo-radiobuttons
+  [role="radiogroup"]
+  > label:last-of-type {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: start !important;
+  padding-left: 0.25rem !important;
 }
 
 #vip-fw26-page .vip__form .klaviyo-radiobuttons input[type="radio"] {
@@ -74,13 +125,18 @@
   width: 1px !important;
   height: 1px !important;
   padding: 0 !important;
-  margin: -1px !important;
+  margin: 0 !important;
   overflow: hidden !important;
   clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
   white-space: nowrap !important;
   border: 0 !important;
   opacity: 0 !important;
+  flex: 0 0 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   accent-color: transparent !important;
+  pointer-events: none !important;
 }
 
 #vip-fw26-page
@@ -91,7 +147,10 @@
   + label {
   display: inline-flex !important;
   align-items: center !important;
+  justify-content: flex-start !important;
   gap: 0.65rem !important;
+  min-width: 0 !important;
+  width: auto !important;
   padding: 0 !important;
   margin: 0 !important;
   background: none !important;
@@ -154,10 +213,32 @@
   outline-offset: 2px !important;
 }
 
-/* Larger squares + touch-friendly spacing on small screens */
-@media (max-width: 640px) {
+/* Desktop: centered pair under the question (not pinned to form edges) */
+@media (min-width: 641px) {
   #vip-fw26-page .vip__form .klaviyo-radiobuttons [role="radiogroup"] {
-    gap: 1.5rem 3.25rem !important;
+    grid-template-columns: max-content max-content !important;
+    justify-content: center !important;
+    justify-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    column-gap: clamp(4.25rem, 11vw, 7.75rem) !important;
+  }
+
+  #vip-fw26-page
+    .vip__form
+    .klaviyo-radiobuttons
+    [role="radiogroup"]
+    > label:first-of-type,
+  #vip-fw26-page
+    .vip__form
+    .klaviyo-radiobuttons
+    [role="radiogroup"]
+    > label:last-of-type {
+    justify-self: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   #vip-fw26-page
@@ -166,10 +247,8 @@
     [role="radiogroup"]
     input[type="radio"]
     + label {
-    gap: 0.8rem !important;
-    font-size: 1.2rem !important;
-    padding: 0.35rem 0.15rem !important;
-    min-height: 2.75rem !important;
+    font-size: 1.15rem !important;
+    gap: 0.7rem !important;
   }
 
   #vip-fw26-page
@@ -178,8 +257,41 @@
     [role="radiogroup"]
     input[type="radio"]
     + label::before {
-    width: 1.875rem !important;
-    height: 1.875rem !important;
+    width: 1.55rem !important;
+    height: 1.55rem !important;
+  }
+}
+
+/* Larger squares + touch-friendly spacing on small screens */
+@media (max-width: 640px) {
+  #vip-fw26-page .vip__form .klaviyo-radiobuttons [role="radiogroup"] {
+    column-gap: clamp(4.25rem, 26vw, 6.75rem) !important;
+    transform: translateX(0.2rem) !important;
+  }
+
+  #vip-fw26-page
+    .vip__form
+    .klaviyo-radiobuttons
+    [role="radiogroup"]
+    input[type="radio"]
+    + label {
+    gap: 0.85rem !important;
+    font-size: 1.25rem !important;
+    padding: 0.35rem 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
+    min-height: 2.85rem !important;
+    justify-content: center !important;
+  }
+
+  #vip-fw26-page
+    .vip__form
+    .klaviyo-radiobuttons
+    [role="radiogroup"]
+    input[type="radio"]
+    + label::before {
+    width: 2rem !important;
+    height: 2rem !important;
     border-width: 2px !important;
   }
 
