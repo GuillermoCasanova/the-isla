@@ -37,3 +37,158 @@
 #vip-fw26-page .vip__form form.klaviyo-form button.klaviyo-form-button[type="button"] {
   color: #1f1d1b !important;
 }
+
+/* --- FW26 Klaviyo: plus-one radio options (revert: delete this entire section) --- */
+
+/* Question row immediately above the plus-one radios */
+#vip-fw26-page
+  .vip__form
+  [data-testid="form-row"]:has(+ [data-testid="form-row"] .klaviyo-radiobuttons)
+  .klaviyo-form-richtext
+  p,
+#vip-fw26-page
+  .vip__form
+  [data-testid="form-row"]:has(+ [data-testid="form-row"] .klaviyo-radiobuttons)
+  .klaviyo-form-richtext
+  strong {
+  font-size: 1.0625rem !important;
+  line-height: 1.35 !important;
+  text-align: center !important;
+  margin-bottom: 0.35rem !important;
+}
+
+/* Klaviyo: input (sr-only) then label (SVG circles + text). One square per option via label::before. */
+#vip-fw26-page .vip__form .klaviyo-radiobuttons [role="radiogroup"] {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 1.25rem 2.75rem !important;
+  width: 100% !important;
+  margin-top: 0.5rem !important;
+}
+
+#vip-fw26-page .vip__form .klaviyo-radiobuttons input[type="radio"] {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  accent-color: transparent !important;
+}
+
+#vip-fw26-page
+  .vip__form
+  .klaviyo-radiobuttons
+  [role="radiogroup"]
+  input[type="radio"]
+  + label {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  color: inherit !important;
+  font-family: var(--secondary-font-family) !important;
+  font-size: 1.125rem !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+
+#vip-fw26-page
+  .vip__form
+  .klaviyo-radiobuttons
+  [role="radiogroup"]
+  input[type="radio"]
+  + label
+  svg {
+  display: none !important;
+}
+
+#vip-fw26-page
+  .vip__form
+  .klaviyo-radiobuttons
+  [role="radiogroup"]
+  input[type="radio"]
+  + label::before {
+  content: "" !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  border-radius: 2px !important;
+  border: 2px solid rgba(31, 29, 27, 0.75) !important;
+  background-color: #fff !important;
+  box-sizing: border-box !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+
+#vip-fw26-page
+  .vip__form
+  .klaviyo-radiobuttons
+  [role="radiogroup"]
+  input[type="radio"]:checked
+  + label::before {
+  border-color: #1f1d1b !important;
+  background-color: #1f1d1b !important;
+  box-shadow: inset 0 0 0 3px #fff !important;
+}
+
+#vip-fw26-page
+  .vip__form
+  .klaviyo-radiobuttons
+  [role="radiogroup"]
+  input[type="radio"]:focus-visible
+  + label::before {
+  outline: 2px solid #dfe3e1 !important;
+  outline-offset: 2px !important;
+}
+
+/* Larger squares + touch-friendly spacing on small screens */
+@media (max-width: 640px) {
+  #vip-fw26-page .vip__form .klaviyo-radiobuttons [role="radiogroup"] {
+    gap: 1.5rem 3.25rem !important;
+  }
+
+  #vip-fw26-page
+    .vip__form
+    .klaviyo-radiobuttons
+    [role="radiogroup"]
+    input[type="radio"]
+    + label {
+    gap: 0.8rem !important;
+    font-size: 1.2rem !important;
+    padding: 0.35rem 0.15rem !important;
+    min-height: 2.75rem !important;
+  }
+
+  #vip-fw26-page
+    .vip__form
+    .klaviyo-radiobuttons
+    [role="radiogroup"]
+    input[type="radio"]
+    + label::before {
+    width: 1.875rem !important;
+    height: 1.875rem !important;
+    border-width: 2px !important;
+  }
+
+  #vip-fw26-page
+    .vip__form
+    .klaviyo-radiobuttons
+    [role="radiogroup"]
+    input[type="radio"]:checked
+    + label::before {
+    box-shadow: inset 0 0 0 4px #fff !important;
+  }
+}
