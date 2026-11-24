@@ -19,6 +19,9 @@ const ENVELOPE_EXIT_DURATION = 0.95;
 const FORM_FADE_DURATION = 0.5;
 const LOGO_FADE_DURATION = 0.65;
 
+/** Gap after envelope exit before Klaviyo layout + form fade (lets scroll height settle). */
+const POST_ENVELOPE_SETTLE_S = 0.14;
+
 /** Max wait if app-shell-ready never fires (avoids hanging forever with no animation). */
 const SHELL_READY_FALLBACK_MS = 3500;
 
@@ -28,12 +31,24 @@ const REF_BIND_MAX_FRAMES = 180;
 /** If GSAP never reveals the form (error / stuck), un-hide it so Klaviyo is not trapped behind CSS. */
 const FORM_REVEAL_FALLBACK_MS = 10000;
 
+/** Max wait for Klaviyo embed to mount before revealing the form anyway. */
+const KLAVIYO_READY_TIMEOUT_MS = 5500;
+
+/** Klaviyo container height must be unchanged this long before we fade the form in. */
+const KLAVIYO_STABLE_MS = 150;
+
 let rootEl;
 let cardEl;
 let envelopeBackEl;
 let envelopeFrontEl;
 let formEl;
 let producedEl;
+
+/** Hide fixed nav on mobile after scrolling past the invite (desktop unchanged). */
+let headerHiddenOnMobile = false;
+
+const MOBILE_HEADER_SHOW_MAX_SCROLL_Y = 16;
+const MOBILE_HEADER_HIDE_MIN_SCROLL_Y = 52;
 
 /** Keeps the scrollbar from appearing while envelopes animate (transform extends overflow). */
 function lockIntroScroll() {
@@ -85,12 +100,81 @@ function nudgeKlaviyoOnsite() {
   }
 }
 
+/**
+ * @param {HTMLElement} formContainer
+ * @param {() => boolean} isCancelled
+ */
+async function waitForKlaviyoFormReady(formContainer, isCancelled) {
+  const deadline = Date.now() + KLAVIYO_READY_TIMEOUT_MS;
+  let lastHeight = -1;
+  let stableAt = 0;
+
+  while (Date.now() < deadline) {
+    if (isCancelled()) return;
+
+    const klaviyoForm = formContainer.querySelector("form.klaviyo-form");
+    const hasEmbed =
+      klaviyoForm &&
+      (klaviyoForm.querySelector('[type="submit"]') ||
+        klaviyoForm.querySelector('input[type="email"]'));
+
+    const height = formContainer.offsetHeight;
+
+    if (hasEmbed && height > 80) {
+      if (height === lastHeight) {
+        if (stableAt === 0) stableAt = Date.now();
+        if (Date.now() - stableAt >= KLAVIYO_STABLE_MS) return;
+      } else {
+        stableAt = 0;
+        lastHeight = height;
+      }
+    } else {
+      stableAt = 0;
+      lastHeight = height;
+    }
+
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  }
+}
+
 onMount(() => {
   let cancelled = false;
   /** @type {(() => void) | undefined} */
   let revertGsap;
   /** @type {number | undefined} */
   let revealFallbackTimer;
+  let klaviyoRevealStarted = false;
+
+  const mobileHeaderMq =
+    typeof window !== "undefined"
+      ? window.matchMedia("(max-width: 640px)")
+      : null;
+
+  function updateMobileHeaderVisibility() {
+    if (typeof window === "undefined" || !mobileHeaderMq?.matches) {
+      headerHiddenOnMobile = false;
+      return;
+    }
+
+    const y = window.scrollY;
+    if (y <= MOBILE_HEADER_SHOW_MAX_SCROLL_Y) {
+      headerHiddenOnMobile = false;
+      return;
+    }
+    if (y >= MOBILE_HEADER_HIDE_MIN_SCROLL_Y) {
+      headerHiddenOnMobile = true;
+      return;
+    }
+
+    if (producedEl) {
+      const producedTop = producedEl.getBoundingClientRect().top;
+      headerHiddenOnMobile = producedTop < 88;
+    }
+  }
+
+  function onMobileHeaderScroll() {
+    updateMobileHeaderVisibility();
+  }
 
   function formStillHidden() {
     if (typeof document === "undefined" || !formEl) return true;
@@ -137,6 +221,7 @@ onMount(() => {
       preloadImage(envelopeBackImg),
       preloadImage(envelopeFrontImg),
       preloadImage(panorawmaLogo),
+      preloadImage(bgMobileVipInvite),
     ]);
     if (cancelled) return;
 
@@ -160,19 +245,66 @@ onMount(() => {
     revealFallbackTimer = window.setTimeout(() => {
       if (cancelled || !formEl) return;
       if (!formStillHidden()) return;
-      gsap.set(formEl, { autoAlpha: 1, pointerEvents: "auto" });
-      if (producedEl) gsap.set(producedEl, { autoAlpha: 1 });
-      nudgeKlaviyoOnsite();
-      window.setTimeout(nudgeKlaviyoOnsite, 300);
+      void revealProducedAndFormAfterKlaviyo();
     }, FORM_REVEAL_FALLBACK_MS);
   }
 
+  async function afterEnvelopeLayoutSettled() {
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+    if (cancelled) return;
+    void revealProducedAndFormAfterKlaviyo();
+  }
+
+  async function revealProducedAndFormAfterKlaviyo() {
+    if (cancelled || !formEl || !producedEl) return;
+    if (klaviyoRevealStarted) return;
+    klaviyoRevealStarted = true;
+
+    gsap.set(formEl, {
+      opacity: 0,
+      visibility: "visible",
+      pointerEvents: "none",
+    });
+
+    nudgeKlaviyoOnsite();
+    await waitForKlaviyoFormReady(formEl, () => cancelled);
+
+    if (cancelled) return;
+
+    gsap.to(producedEl, {
+      autoAlpha: 1,
+      duration: LOGO_FADE_DURATION,
+      ease: "power2.out",
+    });
+
+    gsap.to(formEl, {
+      autoAlpha: 1,
+      pointerEvents: "auto",
+      duration: FORM_FADE_DURATION,
+      ease: "power2.out",
+      onComplete: () => {
+        unlockIntroScroll();
+        updateMobileHeaderVisibility();
+      },
+    });
+  }
+
   void boot();
+
+  if (mobileHeaderMq) {
+    window.addEventListener("scroll", onMobileHeaderScroll, { passive: true });
+    mobileHeaderMq.addEventListener("change", updateMobileHeaderVisibility);
+    updateMobileHeaderVisibility();
+  }
 
   return () => {
     cancelled = true;
     if (revealFallbackTimer) window.clearTimeout(revealFallbackTimer);
     unlockIntroScroll();
+    window.removeEventListener("scroll", onMobileHeaderScroll);
+    mobileHeaderMq?.removeEventListener("change", updateMobileHeaderVisibility);
     revertGsap?.();
   };
 
@@ -251,11 +383,6 @@ onMount(() => {
 
           const tl = gsap.timeline({
             defaults: { ease: "power2.out" },
-            onComplete: () => {
-              unlockIntroScroll();
-              nudgeKlaviyoOnsite();
-              window.setTimeout(nudgeKlaviyoOnsite, 200);
-            },
           });
 
           tl.to([cardEl, ...envelopeLayers], {
@@ -278,6 +405,8 @@ onMount(() => {
             "-=0.7", // start opacity fade at the same time as yPercent or adjust timing if needed
           );
 
+          const envelopeEnd = INTRO_DURATION + ENVELOPE_EXIT_DURATION;
+
           // yPercent moves absolutely positioned envelopes in document flow, so the layout
           // can keep extra scroll height after fade. Remove from layout once the move ends.
           tl.set(
@@ -287,28 +416,15 @@ onMount(() => {
               yPercent: 0,
               clearProps: "transform",
             },
-            INTRO_DURATION + ENVELOPE_EXIT_DURATION,
+            envelopeEnd,
           );
 
-          tl.to(
-            producedEl,
-            {
-              autoAlpha: 1,
-              duration: LOGO_FADE_DURATION,
-              ease: "power2.out",
+          tl.call(
+            () => {
+              void afterEnvelopeLayoutSettled();
             },
-            INTRO_DURATION + ENVELOPE_EXIT_DURATION,
-          );
-
-          tl.to(
-            formEl,
-            {
-              autoAlpha: 1,
-              pointerEvents: "auto",
-              duration: FORM_FADE_DURATION,
-              ease: "power2.out",
-            },
-            "-=0.1",
+            null,
+            `${envelopeEnd}+=${POST_ENVELOPE_SETTLE_S}`,
           );
         }, root);
       },
@@ -342,6 +458,8 @@ $: ogImageUrl = `${$page.url.origin}/og_image_vip_fw26.jpg`;
   <meta name="twitter:title" content={ogTitle} />
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={ogImageUrl} />
+
+  <link rel="preload" as="image" href={bgMobileVipInvite} />
 </svelte:head>
 
 <div class="vip" id="vip-fw26-page" bind:this={rootEl}>
@@ -351,7 +469,10 @@ $: ogImageUrl = `${$page.url.origin}/og_image_vip_fw26.jpg`;
       style="--vip-fw26-hero-bg: url({bgMobileVipInvite})"
     >
       <section class="vip-reveal" aria-label="FW-26">
-        <header class="vip__header">
+        <header
+          class="vip__header"
+          class:vip-fw26__header--hidden={headerHiddenOnMobile}
+        >
           <span class="vip__header-left"
             ><a href="/">LA ISLA FASHION SHOW</a></span
           >
@@ -439,6 +560,26 @@ $: ogImageUrl = `${$page.url.origin}/og_image_vip_fw26.jpg`;
     background-size: cover;
   }
 
+  @media (max-width: 640px) {
+    #vip-fw26-page .vip-fw26__hero-inner {
+      overflow-x: clip;
+    }
+  }
+
+  /*
+   * Reserve Klaviyo form height before reveal so hero-inner does not jump
+   * (reduces mobile background cover “stutter” when the embed finishes layout).
+   */
+  #vip-fw26-page .vip__form {
+    min-height: clamp(20rem, 58vh, 26rem);
+  }
+
+  @media (min-width: 641px) {
+    #vip-fw26-page .vip__form {
+      min-height: clamp(22rem, 48vh, 28rem);
+    }
+  }
+
   /* Page text color #dfe3e1 (overrides vip-page.css + header) */
   #vip-fw26-page {
     color: #dfe3e1;
@@ -447,6 +588,23 @@ $: ogImageUrl = `${$page.url.origin}/og_image_vip_fw26.jpg`;
   #vip-fw26-page .vip__header,
   #vip-fw26-page .vip__header a {
     color: #dfe3e1 !important;
+  }
+
+  @media (max-width: 640px) {
+    #vip-fw26-page .vip__header {
+      transition:
+        opacity 0.28s ease,
+        transform 0.28s ease,
+        visibility 0.28s ease;
+      will-change: opacity, transform;
+    }
+
+    #vip-fw26-page .vip__header.vip-fw26__header--hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-0.4rem);
+    }
   }
 
   .vip-fw26__produced {
